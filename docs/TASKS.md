@@ -15,30 +15,30 @@ Kurallar:
 
 ### Gün 1: Kurulum
 - [x] `~/Desktop/tracklab` klasörü ve `git init`
-- [ ] Python 3.12 kurulu (`python3.12 --version`)
-- [ ] `.venv` 3.12 ile yeniden oluşturuldu
-- [ ] `pip install ultralytics ipykernel`; MPS kontrolü `True`
-- [ ] Proje kökünde `.gitignore` var (içinde `.venv/` dahil)
-- [ ] Klasör iskeleti: `src/tracklab`, `scripts`, `data`, `outputs`, `tests`, `notebooks`
-- [ ] `notebooks/00_sanity_check.ipynb` 3.12 kernel ile çalışıyor
-- [ ] `data/sample.mp4` (Pexels'ten 10-20 sn yaya videosu)
-- [ ] `yolo track ...` komutu çalıştı, ID'ler tutarlı mı kontrol edildi
-- [ ] İlk commit: `Initial project setup`
+- [x] Python 3.12 kurulu (`python3.12 --version`)
+- [x] `.venv` 3.12 ile yeniden oluşturuldu
+- [x] `pip install ultralytics ipykernel`; MPS kontrolü `True`
+- [x] Proje kökünde `.gitignore` var (içinde `.venv/` dahil)
+- [x] Klasör iskeleti: `src/tracklab`, `scripts`, `data`, `outputs`, `tests`, `notebooks`
+- [x] `notebooks/00_sanity_check.ipynb` 3.12 kernel ile çalışıyor
+- [x] `data/sample.mp4` (Pexels'ten 10-20 sn yaya videosu)
+- [x] `yolo track ...` komutu çalıştı, ID'ler tutarlı mı kontrol edildi
+- [x] İlk commit: `Initial project setup`
 
 **Bitti ölçütü:** CLI ile ID'li takip videosu üretildi, ilk commit atıldı.
 
-### Gün 2: Kendi script'imiz (ID'li MP4 + JSON)
-- [ ] `LICENSE` kararı (öneri: AGPL-3.0)
-- [ ] `src/tracklab/schemas.py`
-- [ ] `src/tracklab/config.py` ve `configs/pipeline.yaml`, `detector.yaml`, `bytetrack.yaml`
-- [ ] `src/tracklab/io/video.py` (kare okuma/yazma)
-- [ ] `src/tracklab/io/results.py` (JSON)
-- [ ] `src/tracklab/viz/draw.py`
-- [ ] `src/tracklab/tracking/yolo_bytetrack.py`
-- [ ] `src/tracklab/pipeline.py`
-- [ ] `scripts/run_video.py`
-- [ ] `tests/unit/test_results_io.py`
-- [ ] Commit
+### Gün 2: Python pipeline'ı (Ultralytics API ile ID'li MP4 + JSON)
+- [x] `LICENSE` kararı (öneri: AGPL-3.0)
+- [x] `src/tracklab/schemas.py`
+- [x] `src/tracklab/config.py` ve `configs/pipeline.yaml`, `detector.yaml`, `bytetrack.yaml`
+- [x] `src/tracklab/io/video.py` (kare okuma/yazma)
+- [x] `src/tracklab/io/results.py` (JSON)
+- [x] `src/tracklab/viz/draw.py`
+- [x] `src/tracklab/tracking/yolo_bytetrack.py`
+- [x] `src/tracklab/pipeline.py`
+- [x] `scripts/run_video.py`
+- [x] `tests/unit/test_results_io.py`
+- [x] Commit
 
 **Bitti ölçütü:** `run_video.py` örnek videoda ID'li MP4 + JSON üretiyor.
 

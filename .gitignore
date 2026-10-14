@@ -7,3 +7,4 @@ outputs/
 runs/
 *.pt
 docs/PROJECT_PLAN.pdf
+*.egg-info/

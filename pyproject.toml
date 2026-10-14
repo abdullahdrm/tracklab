@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tracklab"
+version = "0.1.0"
+description = "YOLO and ByteTrack-based object tracking and video analytics pipeline"
+license = "AGPL-3.0-only"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+dependencies = [
+    "ultralytics",
+    "pydantic>=2",
+    "PyYAML",
+    "numpy",
+    "fastapi",
+    "uvicorn[standard]",
+    "python-multipart",
+    "SQLAlchemy>=2.0",
+    "psycopg[binary]>=3.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+    "httpx",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

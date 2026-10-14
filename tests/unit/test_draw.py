@@ -95,3 +95,12 @@ def test_rejects_non_positive_thickness() -> None:
 
     with pytest.raises(ValueError, match="thickness"):
         draw_tracks(frame, [], thickness=0)
+
+
+def test_draws_box_at_right_boundary_without_overflow() -> None:
+    frame = np.zeros((64, 80, 3), dtype=np.uint8)
+    obj = make_object(x1=70, y1=10, x2=79, y2=40)
+
+    result = draw_tracks(frame, [obj], class_names={2: "car"})
+    assert result.shape == frame.shape
+    assert np.any(result != frame)

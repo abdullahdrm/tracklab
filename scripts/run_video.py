@@ -7,6 +7,12 @@ from pathlib import Path
 from tracklab.config import load_config
 from tracklab.pipeline import VideoPipeline
 
+DEFAULT_CONFIG_PATH = Path("configs/pipeline.yaml")
+if not DEFAULT_CONFIG_PATH.is_file():
+    _repo_default = Path(__file__).resolve().parent.parent / "configs" / "pipeline.yaml"
+    if _repo_default.is_file():
+        DEFAULT_CONFIG_PATH = _repo_default
+
 
 def main() -> int:
     """Parse arguments, run the pipeline, and print a summary."""
@@ -22,7 +28,7 @@ def main() -> int:
     parser.add_argument(
         "--config",
         type=Path,
-        default=Path("configs/pipeline.yaml"),
+        default=DEFAULT_CONFIG_PATH,
         help="Pipeline YAML path (default: configs/pipeline.yaml).",
     )
     parser.add_argument(

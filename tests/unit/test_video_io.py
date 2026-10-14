@@ -3,7 +3,12 @@
 import numpy as np
 import pytest
 
-from tracklab.io.video import FrameWriter, probe_video, read_frames
+from tracklab.io.video import (
+    FrameWriter,
+    probe_video,
+    read_frames,
+    transcode_video_h264,
+)
 
 
 def test_video_writer_reader_round_trip(tmp_path) -> None:
@@ -52,3 +57,37 @@ def test_writer_rejects_wrong_frame_dimensions(tmp_path) -> None:
         FrameWriter(path, fps=10.0, size=(64, 48)) as writer,
     ):
         writer.write(wrong_frame)
+
+
+def test_transcode_video_h264_missing_source_raises_error(tmp_path) -> None:
+    missing = tmp_path / "missing.mp4"
+    dest = tmp_path / "out.mp4"
+    with pytest.raises(FileNotFoundError, match="Video to transcode not found"):
+        transcode_video_h264(missing, dest)
+
+
+def test_transcode_video_h264_produces_valid_mp4(tmp_path) -> None:
+    source = tmp_path / "source.mp4"
+    dest = tmp_path / "transcoded.mp4"
+
+    with FrameWriter(source, fps=10.0, size=(64, 48)) as writer:
+        for _ in range(3):
+            writer.write(np.zeros((48, 64, 3), dtype=np.uint8))
+
+    output = transcode_video_h264(source, dest)
+    assert output.is_file()
+    assert output.stat().st_size > 0
+    meta = probe_video(output)
+    assert meta.width == 64
+    assert meta.height == 48
+
+
+def test_transcode_video_h264_missing_ffmpeg_raises_runtime_error(
+    tmp_path, monkeypatch
+) -> None:
+    source = tmp_path / "source.mp4"
+    source.write_bytes(b"dummy")
+    dest = tmp_path / "out.mp4"
+    monkeypatch.setattr("shutil.which", lambda _: None)
+    with pytest.raises(RuntimeError, match="FFmpeg is required"):
+        transcode_video_h264(source, dest)

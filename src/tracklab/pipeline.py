@@ -41,7 +41,7 @@ class PipelineRunResult:
 
 
 class VideoPipeline:
-    """Process a video using one persistent detector/tracker instance."""
+    """Process a video using the configured detector/tracker."""
 
     def __init__(
         self,
@@ -51,7 +51,8 @@ class VideoPipeline:
         """Initialize the pipeline with validated config and optional tracker."""
 
         self.config = config
-        self.tracker = tracker if tracker is not None else YoloByteTrack(config)
+        self._injected_tracker = tracker
+        self.tracker: FrameTracker | None = tracker
 
     def run(
         self,
@@ -67,6 +68,11 @@ class VideoPipeline:
         The include_frames setting controls only whether those details are
         included in the JSON file.
         """
+
+        tracker = self._injected_tracker
+        if tracker is None:
+            tracker = YoloByteTrack(self.config)
+        self.tracker = tracker
 
         source = Path(input_path).expanduser().resolve()
         output_root = Path(output_dir).expanduser()
@@ -101,57 +107,56 @@ class VideoPipeline:
         objects_by_class_id: dict[str, int] = {}
         total_detections = 0
 
-        model = getattr(self.tracker, "model", None)
+        model = getattr(tracker, "model", None)
         class_names: ClassNames = getattr(model, "names", None)
 
-        with ExitStack() as stack:
-            writer: FrameWriter | None = None
+        try:
+            with ExitStack() as stack:
+                writer: FrameWriter | None = None
 
-            for frame_index, frame in read_frames(source):
-                objects = self.tracker.track_frame(frame)
+                for frame_index, frame in read_frames(source):
+                    objects = tracker.track_frame(frame)
 
-                if raw_video_path is not None and writer is None:
-                    writer = stack.enter_context(
-                        FrameWriter(
-                            raw_video_path,
-                            fps=meta.fps,
-                            size=(meta.width, meta.height),
+                    if raw_video_path is not None and writer is None:
+                        writer = stack.enter_context(
+                            FrameWriter(
+                                raw_video_path,
+                                fps=meta.fps,
+                                size=(meta.width, meta.height),
+                            )
                         )
+
+                    frame_result = FrameResult(
+                        frame_index=frame_index,
+                        timestamp_s=frame_index / meta.fps,
+                        objects=objects,
                     )
+                    frames.append(frame_result)
 
-                frame_result = FrameResult(
-                    frame_index=frame_index,
-                    timestamp_s=frame_index / meta.fps,
-                    objects=objects,
-                )
-                frames.append(frame_result)
+                    total_detections += len(objects)
 
-                total_detections += len(objects)
+                    for obj in objects:
+                        unique_track_ids.add(obj.track_id)
+                        class_key = str(obj.class_id)
+                        objects_by_class_id[class_key] = (
+                            objects_by_class_id.get(class_key, 0) + 1
+                        )
 
-                for obj in objects:
-                    unique_track_ids.add(obj.track_id)
-                    class_key = str(obj.class_id)
-                    objects_by_class_id[class_key] = (
-                        objects_by_class_id.get(class_key, 0) + 1
-                    )
+                    if writer is not None:
+                        annotated = draw_tracks(
+                            frame,
+                            objects,
+                            class_names=class_names,
+                        )
+                        writer.write(annotated)
 
-                if writer is not None:
-                    annotated = draw_tracks(
-                        frame,
-                        objects,
-                        class_names=class_names,
-                    )
-                    writer.write(annotated)
+            if not frames:
+                raise ValueError(f"No readable frames found in video: {source}")
 
-        if not frames:
-            if raw_video_path is not None:
-                raw_video_path.unlink(missing_ok=True)
-            raise ValueError(f"No readable frames found in video: {source}")
-
-        if raw_video_path is not None and video_path is not None:
-            try:
+            if raw_video_path is not None and video_path is not None:
                 transcode_video_h264(raw_video_path, video_path)
-            finally:
+        finally:
+            if raw_video_path is not None:
                 raw_video_path.unlink(missing_ok=True)
 
         summary = {

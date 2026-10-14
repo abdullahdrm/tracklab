@@ -14,6 +14,7 @@ from fastapi import (
     UploadFile,
 )
 from fastapi.responses import FileResponse
+from starlette.concurrency import run_in_threadpool
 
 from tracklab.api.models import Job, utc_now
 from tracklab.api.schemas import JobResponse
@@ -53,7 +54,12 @@ def _find_job(request: Request, job_id: str) -> Job:
         return job
 
 
-def _ready_artifact_path(job: Job, field: str, label: str) -> Path:
+def _ready_artifact_path(
+    job: Job,
+    field: str,
+    label: str,
+    output_dir: Path | None = None,
+) -> Path:
     """Require a completed job and an existing requested output file."""
 
     if job.status != "done":
@@ -69,7 +75,20 @@ def _ready_artifact_path(job: Job, field: str, label: str) -> Path:
             detail=f"No {label} output was produced for this job",
         )
 
-    path = Path(raw_path)
+    path = Path(raw_path).resolve()
+    if output_dir is not None:
+        try:
+            if not path.is_relative_to(output_dir.resolve()):
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"Access to {label} output is forbidden",
+                )
+        except (ValueError, TypeError):
+            raise HTTPException(
+                status_code=403,
+                detail=f"Access to {label} output is forbidden",
+            )
+
     if not path.is_file():
         raise HTTPException(
             status_code=404,
@@ -131,26 +150,31 @@ async def create_job(
             )
 
         # Check that the upload is a readable video before queuing work.
-        try:
-            video_meta = probe_video(upload_path)
-            frame_iterator = read_frames(upload_path)
+        def _validate_video(path: Path) -> tuple[float, int]:
+            meta = probe_video(path)
+            frame_iterator = read_frames(path)
             try:
-                first_frame = next(frame_iterator, None)
+                first = next(frame_iterator, None)
             finally:
                 frame_iterator.close()
+            if first is None or meta.frame_count <= 0:
+                raise ValueError("Uploaded video contains no readable frames.")
+            return meta.fps, meta.frame_count
+
+        try:
+            fps, frame_count = await run_in_threadpool(_validate_video, upload_path)
         except (FileNotFoundError, ValueError) as exc:
+            if "contains no readable frames" in str(exc):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Uploaded video contains no readable frames.",
+                )
             raise HTTPException(
                 status_code=400,
                 detail="Uploaded file is not a valid, readable video.",
             ) from exc
 
-        if first_frame is None or video_meta.frame_count <= 0:
-            raise HTTPException(
-                status_code=400,
-                detail="Uploaded video contains no readable frames.",
-            )
-
-        duration_seconds = video_meta.frame_count / video_meta.fps
+        duration_seconds = frame_count / fps
         if duration_seconds > settings.max_video_duration_seconds:
             raise HTTPException(
                 status_code=422,
@@ -201,7 +225,12 @@ def download_result(job_id: str, request: Request) -> FileResponse:
     """Download the JSON result for a completed job."""
 
     job = _find_job(request, job_id)
-    path = _ready_artifact_path(job, "output_json_path", "JSON")
+    path = _ready_artifact_path(
+        job,
+        "output_json_path",
+        "JSON",
+        output_dir=request.app.state.settings.output_dir,
+    )
 
     return FileResponse(
         path,
@@ -215,7 +244,12 @@ def preview_video(job_id: str, request: Request) -> FileResponse:
     """Stream the annotated video for in-browser playback."""
 
     job = _find_job(request, job_id)
-    path = _ready_artifact_path(job, "output_video_path", "video")
+    path = _ready_artifact_path(
+        job,
+        "output_video_path",
+        "video",
+        output_dir=request.app.state.settings.output_dir,
+    )
 
     return FileResponse(
         path,
@@ -229,7 +263,12 @@ def download_video(job_id: str, request: Request) -> FileResponse:
     """Download the annotated video for a completed job."""
 
     job = _find_job(request, job_id)
-    path = _ready_artifact_path(job, "output_video_path", "video")
+    path = _ready_artifact_path(
+        job,
+        "output_video_path",
+        "video",
+        output_dir=request.app.state.settings.output_dir,
+    )
 
     return FileResponse(
         path,

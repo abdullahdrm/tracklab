@@ -53,6 +53,7 @@ def test_resolve_device() -> None:
     assert resolve_device("cpu") == "cpu"
     assert resolve_device("mps") == "mps"
     assert resolve_device("cuda") == "cuda"
+    assert resolve_device("cuda:0") == "cuda:0"
     assert resolve_device("auto") in {"mps", "cuda", "cpu"}
 
 

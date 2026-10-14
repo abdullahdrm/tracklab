@@ -120,19 +120,21 @@ def draw_tracks(
 
         padding = max(5, round(font_scale * 6))
         panel_top = max(0, y1 - text_height - baseline - 2 * padding)
-        panel_right = min(width - 1, x1 + text_width + 2 * padding)
+        panel_width = text_width + 2 * padding
+        panel_left = min(x1, max(0, width - 1 - panel_width))
+        panel_right = min(width - 1, panel_left + panel_width)
         panel_bottom = min(height - 1, panel_top + text_height + baseline + 2 * padding)
 
         cv2.rectangle(
             annotated,
-            (x1, panel_top),
+            (panel_left, panel_top),
             (panel_right, panel_bottom),
             color,
             thickness=-1,
         )
 
         text_origin = (
-            x1 + padding,
+            panel_left + padding,
             min(height - 1, panel_top + padding + text_height),
         )
         cv2.putText(

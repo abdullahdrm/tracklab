@@ -11,9 +11,8 @@ from pydantic import (
     ConfigDict,
     Field,
     PositiveInt,
+    field_validator,
 )
-
-DeviceName = Literal["auto", "mps", "cuda", "cpu"]
 
 
 class StrictModel(BaseModel):
@@ -30,7 +29,13 @@ class DetectorConfig(StrictModel):
     conf: float = Field(default=0.25, ge=0.0, le=1.0)
     iou: float = Field(default=0.7, ge=0.0, le=1.0)
     classes: list[int] = Field(default_factory=lambda: [0], min_length=1)
-    device: DeviceName = "auto"
+    device: str = "auto"
+
+    @field_validator("device")
+    @classmethod
+    def validate_device(cls, value: str) -> str:
+        resolve_device(value)
+        return value
 
 
 class TrackerConfig(StrictModel):
@@ -197,27 +202,31 @@ def load_config(path: str | Path) -> PipelineConfig:
 def resolve_device(name: str) -> str:
     """Resolve 'auto' to MPS, CUDA or CPU, in that priority order."""
 
-    if name not in {"auto", "mps", "cuda", "cpu"}:
-        raise ValueError(f"Unsupported device: {name}")
+    cleaned = name.strip().lower()
 
-    if name != "auto":
-        return name
+    if cleaned == "auto":
+        try:
+            import torch
+        except ImportError:
+            return "cpu"
 
-    try:
-        import torch
-    except ImportError:
+        mps_backend = getattr(getattr(torch, "backends", None), "mps", None)
+        mps_available = getattr(mps_backend, "is_available", None)
+
+        if callable(mps_available) and mps_available():
+            return "mps"
+
+        cuda_backend = getattr(torch, "cuda", None)
+        cuda_available = getattr(cuda_backend, "is_available", None)
+
+        if callable(cuda_available) and cuda_available():
+            return "cuda"
+
         return "cpu"
 
-    mps_backend = getattr(getattr(torch, "backends", None), "mps", None)
-    mps_available = getattr(mps_backend, "is_available", None)
+    if cleaned in {"mps", "cuda", "cpu"} or (
+        cleaned.startswith("cuda:") and cleaned[5:].isdigit()
+    ):
+        return cleaned
 
-    if callable(mps_available) and mps_available():
-        return "mps"
-
-    cuda_backend = getattr(torch, "cuda", None)
-    cuda_available = getattr(cuda_backend, "is_available", None)
-
-    if callable(cuda_available) and cuda_available():
-        return "cuda"
-
-    return "cpu"
+    raise ValueError(f"Unsupported device: {name}")

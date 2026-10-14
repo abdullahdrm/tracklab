@@ -15,3 +15,4 @@ models/
 notebooks/
 tests/
 docs/
+*.egg-info/

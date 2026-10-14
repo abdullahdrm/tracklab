@@ -96,6 +96,40 @@ def test_pipeline_writes_video_json_and_mot_outputs(
     assert mot_lines[-1].startswith("4,11,")
 
 
+def test_default_tracker_is_created_once_per_run(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "source.mp4"
+    create_test_video(source, frame_count=4)
+
+    config = make_config()
+    config.output.save_video = False
+    config.output.save_json = False
+    config.output.save_mot_txt = False
+
+    created_with = []
+
+    def fake_tracker_factory(received_config):
+        created_with.append(received_config)
+        return FakeTracker()
+
+    monkeypatch.setattr(
+        "tracklab.pipeline.YoloByteTrack",
+        fake_tracker_factory,
+    )
+
+    pipeline = VideoPipeline(config)
+
+    # Model çalıştırma başlamadan yüklenmemeli.
+    assert created_with == []
+
+    run = pipeline.run(source, tmp_path / "results")
+
+    # Tek video çalıştırması, yalnızca bir tracker/model oluşturmalı.
+    assert created_with == [config]
+    assert run.video_result.summary["processed_frames"] == 4
+
+
 def test_pipeline_respects_disabled_outputs(tmp_path: Path) -> None:
     source = tmp_path / "source.mp4"
     output_dir = tmp_path / "results"
@@ -116,3 +150,35 @@ def test_pipeline_respects_disabled_outputs(tmp_path: Path) -> None:
     assert run.mot_path is None
     assert len(run.video_result.frames) == 2
     assert list(output_dir.iterdir()) == []
+
+
+def test_pipeline_cleans_up_raw_video_on_failure(tmp_path: Path) -> None:
+    source = tmp_path / "failing_source.mp4"
+    output_dir = tmp_path / "results"
+    create_test_video(source, frame_count=3)
+
+    raw_path = output_dir / ".failing_source_tracked_raw.mp4"
+
+    class FailingTracker:
+        def __init__(self) -> None:
+            self.calls = 0
+            self.raw_file_seen = False
+
+        def track_frame(self, frame: np.ndarray) -> list[TrackedObject]:
+            self.calls += 1
+            if self.calls == 1:
+                return []
+
+            self.raw_file_seen = raw_path.is_file()
+            raise RuntimeError("Tracker crashed mid-video")
+
+    tracker = FailingTracker()
+    config = make_config()
+
+    with pytest.raises(RuntimeError, match="Tracker crashed mid-video"):
+        VideoPipeline(config, tracker=tracker).run(source, output_dir)
+
+    assert tracker.calls == 2
+    assert tracker.raw_file_seen, "Test sırasında geçici video oluşturulmamış."
+    assert not raw_path.exists(), "Hata sonrası geçici video temizlenmedi."
+    assert list(output_dir.glob(".*_tracked_raw.mp4")) == []

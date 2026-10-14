@@ -26,8 +26,14 @@ def _json_default(value: Any) -> Any:
     if isinstance(value, Path):
         return str(value)
 
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+
     if isinstance(value, np.generic):
         return value.item()
+
+    if isinstance(value, (set, frozenset)):
+        return sorted(value)
 
     raise TypeError(f"Object of type {type(value).__name__} is not JSON serializable")
 

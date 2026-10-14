@@ -1,6 +1,7 @@
 """Job lifecycle management and pipeline execution."""
 
 import logging
+import re
 from collections.abc import Callable
 from pathlib import Path
 from uuid import UUID
@@ -15,6 +16,16 @@ from tracklab.pipeline import VideoPipeline
 logger = logging.getLogger(__name__)
 
 PipelineFactory = Callable[[PipelineConfig], VideoPipeline]
+
+_PATH_PATTERN = re.compile(r"(/[\w./-]+)")
+
+
+def _sanitize_error(exc: Exception) -> str:
+    """Format an exception for storage, stripping absolute paths."""
+
+    message = f"{type(exc).__name__}: {exc}"
+    message = _PATH_PATTERN.sub("<path>", message)
+    return message[:2000]
 
 
 class JobManager:
@@ -52,42 +63,48 @@ class JobManager:
             session.commit()
 
         try:
-            config = load_config(self.settings.config_path)
-            pipeline = self.pipeline_factory(config)
-            output_dir = self.settings.output_dir / job_id
-            result = pipeline.run(input_path, output_dir=output_dir)
-        except Exception as exc:
-            logger.exception("Video job %s failed", job_id)
+            try:
+                config = load_config(self.settings.config_path)
+                pipeline = self.pipeline_factory(config)
+                output_dir = self.settings.output_dir / job_id
+                result = pipeline.run(input_path, output_dir=output_dir)
 
-            with self.session_factory() as session:
-                job = session.get(Job, job_id)
-                if job is not None:
-                    job.status = "failed"
+                with self.session_factory() as session:
+                    job = session.get(Job, job_id)
+                    if job is None:
+                        logger.error("Job %s disappeared before completion", job_id)
+                        return
+
+                    job.status = "done"
                     job.completed_at = utc_now()
-                    job.error = f"{type(exc).__name__}: {exc}"[:2000]
+                    job.summary = result.video_result.summary
+                    job.output_video_path = (
+                        str(result.video_path.resolve())
+                        if result.video_path is not None
+                        else None
+                    )
+                    job.output_json_path = (
+                        str(result.json_path.resolve())
+                        if result.json_path is not None
+                        else None
+                    )
+                    job.output_mot_path = (
+                        str(result.mot_path.resolve())
+                        if result.mot_path is not None
+                        else None
+                    )
                     session.commit()
-            return
 
-        with self.session_factory() as session:
-            job = session.get(Job, job_id)
-            if job is None:
-                logger.error("Job %s disappeared before completion", job_id)
-                return
+            except Exception as exc:
+                logger.exception("Video job %s failed", job_id)
 
-            job.status = "done"
-            job.completed_at = utc_now()
-            job.summary = result.video_result.summary
-            job.output_video_path = (
-                str(result.video_path.resolve())
-                if result.video_path is not None
-                else None
-            )
-            job.output_json_path = (
-                str(result.json_path.resolve())
-                if result.json_path is not None
-                else None
-            )
-            job.output_mot_path = (
-                str(result.mot_path.resolve()) if result.mot_path is not None else None
-            )
-            session.commit()
+                with self.session_factory() as session:
+                    job = session.get(Job, job_id)
+                    if job is not None:
+                        job.status = "failed"
+                        job.completed_at = utc_now()
+                        job.error = _sanitize_error(exc)
+                        session.commit()
+
+        finally:
+            input_path.unlink(missing_ok=True)

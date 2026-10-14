@@ -300,3 +300,140 @@ def test_api_settings_rejects_invalid_duration_limit() -> None:
 
     with pytest.raises(ValueError, match="max_video_duration_seconds"):
         ApiSettings(max_video_duration_seconds=float("inf"))
+
+
+def test_stale_queued_and_running_jobs_are_marked_failed_on_startup(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from tracklab.api.models import Job, utc_now
+
+    app1 = make_app(tmp_path, monkeypatch)
+    now = utc_now()
+
+    queued_id = "11111111-1111-1111-1111-111111111111"
+    running_id = "22222222-2222-2222-2222-222222222222"
+    done_id = "33333333-3333-3333-3333-333333333333"
+
+    with app1.state.session_factory() as session:
+        session.add_all(
+            [
+                Job(
+                    id=queued_id,
+                    original_filename="queued.mp4",
+                    status="queued",
+                    created_at=now,
+                    input_path=str(tmp_path / "queued.mp4"),
+                ),
+                Job(
+                    id=running_id,
+                    original_filename="running.mp4",
+                    status="running",
+                    created_at=now,
+                    started_at=now,
+                    input_path=str(tmp_path / "running.mp4"),
+                ),
+                Job(
+                    id=done_id,
+                    original_filename="done.mp4",
+                    status="done",
+                    created_at=now,
+                    started_at=now,
+                    completed_at=now,
+                    input_path=str(tmp_path / "done.mp4"),
+                ),
+            ]
+        )
+        session.commit()
+
+    # Simulate an application restart using the same SQLite database.
+    app1.state.engine.dispose()
+    app2 = make_app(tmp_path, monkeypatch)
+
+    with TestClient(app2) as client:
+        queued = client.get(f"/jobs/{queued_id}").json()
+        running = client.get(f"/jobs/{running_id}").json()
+        done = client.get(f"/jobs/{done_id}").json()
+
+    for recovered in (queued, running):
+        assert recovered["status"] == "failed"
+        assert recovered["completed_at"] is not None
+        assert "yeniden başlatıldığında" in recovered["error"]
+
+    assert done["status"] == "done"
+    assert done["error"] is None
+
+
+def test_upload_file_is_cleaned_up_after_completion(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    video_bytes = create_video(tmp_path / "cleanup_test.mp4")
+    app = make_app(tmp_path, monkeypatch)
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/jobs",
+            files={"file": ("cleanup_test.mp4", video_bytes, "video/mp4")},
+        )
+        assert response.status_code == 202
+
+    assert list((tmp_path / "uploads").iterdir()) == []
+
+
+def test_error_sanitization_removes_internal_paths(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    video_bytes = create_video(tmp_path / "failing.mp4")
+
+    class PathLeakingPipeline:
+        def run(self, input_path: Path, output_dir: Path):
+            raise RuntimeError(
+                "Secret error at /Users/secret/path/to/hidden.pt with /app/data"
+            )
+
+    settings = ApiSettings(
+        database_url=f"sqlite:///{tmp_path / 'tracklab-sanitize-test.sqlite3'}",
+        upload_dir=tmp_path / "uploads",
+        output_dir=tmp_path / "outputs",
+        config_path=PROJECT_ROOT / "configs" / "pipeline.yaml",
+    )
+    app = create_app(
+        settings,
+        pipeline_factory=lambda config: PathLeakingPipeline(),  # type: ignore[arg-type]
+    )
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/jobs",
+            files={"file": ("failing.mp4", video_bytes, "video/mp4")},
+        )
+        assert response.status_code == 202
+        job_id = response.json()["id"]
+
+        status = client.get(f"/jobs/{job_id}").json()
+        assert status["status"] == "failed"
+        assert "/Users/secret" not in status["error"]
+        assert "<path>" in status["error"]
+        assert list((tmp_path / "uploads").iterdir()) == []
+
+
+def test_ready_artifact_path_rejects_path_outside_output_dir(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from tracklab.api.models import Job, utc_now
+
+    app = make_app(tmp_path, monkeypatch)
+    with app.state.session_factory() as session:
+        job = Job(
+            id="22222222-2222-2222-2222-222222222222",
+            original_filename="evil.mp4",
+            status="done",
+            created_at=utc_now(),
+            input_path=str(tmp_path / "evil.mp4"),
+            output_json_path="/etc/passwd",
+        )
+        session.add(job)
+        session.commit()
+
+    with TestClient(app) as client:
+        response = client.get("/jobs/22222222-2222-2222-2222-222222222222/result")
+        assert response.status_code == 403

@@ -23,7 +23,7 @@ WORKDIR /app
 RUN groupadd --system tracklab \
     && useradd --system --gid tracklab --create-home tracklab
 
-COPY pyproject.toml LICENSE ./
+COPY pyproject.toml README.md LICENSE ./
 COPY src/ ./src/
 
 RUN python -m pip install --upgrade pip \

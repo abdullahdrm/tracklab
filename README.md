@@ -46,11 +46,18 @@ Create and activate a Python 3.12 virtual environment, then install the project:
 python -m pip install -e ".[dev]"
 ```
 
-Install FFmpeg separately if it is not already available. On macOS with
-Homebrew:
+Install FFmpeg separately if it is not already available.
+
+On macOS with Homebrew:
 
 ```bash
 brew install ffmpeg
+```
+
+On Ubuntu/Debian:
+
+```bash
+sudo apt-get update && sudo apt-get install -y ffmpeg
 ```
 
 ### Process a video
@@ -89,6 +96,10 @@ The main endpoints are:
 The default upload limit is 500 MiB and the default video duration limit is
 600 seconds (10 minutes). These are configurable with the environment variables
 `TRACKLAB_MAX_UPLOAD_BYTES` and `TRACKLAB_MAX_VIDEO_DURATION_SECONDS`.
+
+Uploaded source videos are temporary: the API deletes them after processing
+succeeds or fails, and also deletes uploads rejected during validation.
+Generated result files remain in `outputs/` until removed manually.
 
 ## Docker Compose
 

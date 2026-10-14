@@ -139,7 +139,7 @@
     <section class="card">
       <h2>1. Video seç</h2>
       <form id="uploadForm">
-        <label class="dropzone" for="videoFile">
+        <label class="dropzone" for="videoFile" tabindex="0" role="button" aria-label="Video dosyası seç">
           <div class="upload-icon" aria-hidden="true">↑</div>
           <div class="drop-title">Video dosyanı seçmek için tıkla</div>
           <div class="hint">MP4, MOV, AVI veya MKV · En fazla 500 MB · En fazla 10 dakika</div>
@@ -187,15 +187,17 @@
       </div>
 
       <div id="resultSection" class="hidden">
-        <h2 style="margin-top:24px">3. İşlenmiş video</h2>
-        <p class="muted">
-          Bu video, orijinal dosyadan ayrıdır ve kutu, sınıf etiketi
-          ve takip ID'lerini içerir.
-        </p>
-        <video id="resultVideo" controls playsinline preload="metadata"></video>
+        <div id="videoContainer" class="hidden">
+          <h2 style="margin-top:24px">3. İşlenmiş video</h2>
+          <p class="muted">
+            Bu video, orijinal dosyadan ayrıdır ve kutu, sınıf etiketi
+            ve takip ID'lerini içerir.
+          </p>
+          <video id="resultVideo" controls playsinline preload="metadata"></video>
+        </div>
         <div class="actions">
-          <a id="videoDownload" class="button primary" href="#">MP4 indir</a>
-          <a id="jsonDownload" class="button secondary" href="#">JSON sonuçlarını indir</a>
+          <a id="videoDownload" class="button primary hidden" href="#">MP4 indir</a>
+          <a id="jsonDownload" class="button secondary hidden" href="#">JSON sonuçlarını indir</a>
         </div>
       </div>
     </section>
@@ -220,6 +222,19 @@
     const summary = document.getElementById("summary");
     const resultSection = document.getElementById("resultSection");
     const resultVideo = document.getElementById("resultVideo");
+    const videoContainer = document.getElementById("videoContainer");
+    const videoDownload = document.getElementById("videoDownload");
+    const jsonDownload = document.getElementById("jsonDownload");
+    const dropzone = document.querySelector(".dropzone");
+
+    if (dropzone) {
+      dropzone.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          fileInput.click();
+        }
+      });
+    }
 
     const maxBytes = 500 * 1024 * 1024;
     const maxDurationSeconds = 10 * 60;
@@ -330,13 +345,24 @@
           if (job.video_available) {
             const base = `/jobs/${encodeURIComponent(jobId)}`;
             resultVideo.src = `${base}/preview`;
-            document.getElementById("videoDownload").href = `${base}/video`;
-            resultSection.classList.remove("hidden");
+            videoDownload.href = `${base}/video`;
+            videoContainer.classList.remove("hidden");
+            videoDownload.classList.remove("hidden");
+          } else {
+            videoContainer.classList.add("hidden");
+            videoDownload.classList.add("hidden");
           }
 
           if (job.json_available) {
-            document.getElementById("jsonDownload").href =
+            jsonDownload.href =
               `/jobs/${encodeURIComponent(jobId)}/result`;
+            jsonDownload.classList.remove("hidden");
+          } else {
+            jsonDownload.classList.add("hidden");
+          }
+
+          if (job.video_available || job.json_available) {
+            resultSection.classList.remove("hidden");
           }
 
           return;
@@ -390,6 +416,9 @@
       submitButton.textContent = "Yükleniyor…";
       jobCard.classList.remove("hidden");
       resultSection.classList.add("hidden");
+      videoContainer.classList.add("hidden");
+      videoDownload.classList.add("hidden");
+      jsonDownload.classList.add("hidden");
       summary.classList.add("hidden");
       statusBadge.className = "badge";
       statusBadge.textContent = "Yükleniyor";

@@ -1,5 +1,6 @@
 """FastAPI application factory for TrackLab."""
 
+import logging
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -12,14 +13,38 @@ from tracklab.api.database import (
     create_database_engine,
     create_session_factory,
 )
-from tracklab.api.models import Base
+from tracklab.api.models import Base, Job, utc_now
 from tracklab.api.routes import router
 from tracklab.api.service import JobManager
 from tracklab.api.settings import ApiSettings
 from tracklab.config import PipelineConfig
 from tracklab.pipeline import VideoPipeline
 
+logger = logging.getLogger(__name__)
+
 WEB_UI_PATH = Path(__file__).resolve().parent / "static" / "index.html"
+
+
+def _recover_stale_jobs(session_factory: sessionmaker[Session]) -> int:
+    """Mark queued or running jobs as failed after a restart."""
+
+    with session_factory() as session:
+        stale_jobs = (
+            session.query(Job).filter(Job.status.in_(("queued", "running"))).all()
+        )
+        for job in stale_jobs:
+            job.status = "failed"
+            job.completed_at = utc_now()
+            job.error = (
+                "İş, sunucu yeniden başlatıldığında otomatik devam ettirilemedi."
+            )
+        if stale_jobs:
+            session.commit()
+            logger.warning(
+                "Recovered %d stale queued/running job(s) as failed",
+                len(stale_jobs),
+            )
+        return len(stale_jobs)
 
 
 def create_app(
@@ -35,6 +60,8 @@ def create_app(
     engine = create_database_engine(app_settings.database_url)
     Base.metadata.create_all(bind=engine)
     session_factory: sessionmaker[Session] = create_session_factory(engine)
+
+    _recover_stale_jobs(session_factory)
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:

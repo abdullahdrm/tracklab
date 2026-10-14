@@ -60,10 +60,10 @@ Kurallar:
 **Bitti ölçütü:** Tarayıcıda video yüklenip sonuç oynatılabiliyor.
 
 ### Gün 5: Docker ve ilk sürüm
-- [ ] `docker/Dockerfile`, `docker/docker-compose.yml`
-- [ ] `README.md` ilk sürüm
-- [ ] Taslak `ci.yml`
-- [ ] `v0.1` etiketi
+- [x] `docker/Dockerfile`, `docker/docker-compose.yml`
+- [x] `README.md` ilk sürüm
+- [x] Taslak `ci.yml`
+- [x] `v0.1.0` release etiketi
 
 **Bitti ölçütü:** `docker compose up` ile aynı akış çalışıyor.
 

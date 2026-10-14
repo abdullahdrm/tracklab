@@ -32,3 +32,13 @@
 - Arayüzde dosya türü, boyut ve desteklenen durumlarda video süresi için erken kontrol eklendi.
 - Doğrulama: 41 test geçti; Ruff, format ve diff kontrolleri temiz.
 - Not: Starlette/httpx deprecation uyarısı sürüyor; test başarısını etkilemiyor.
+
+## 2026-10-14: Gün 5
+- CPU odaklı Docker imajı, Docker Compose, README ve GitHub Actions CI taslağı eklendi.
+- Docker Compose yapılandırması doğrulandı ve imaj başarıyla oluşturuldu.
+- Container içindeki eksik `lap` bağımlılığı proje metadata'sına eklendi; imaj yeniden oluşturuldu.
+- Container sağlık kontrolü `/health` üzerinden HTTP 200 döndürdü.
+- Docker üzerinden `sample2.mp4` başarıyla işlendi: 505 kare, 4.890 tespit, 145 benzersiz takip ID'si.
+- MP4 ve JSON çıktıları host üzerindeki `outputs/jobs/` dizinine yazıldı; tarayıcı önizlemesi test edildi.
+- `analytics.yaml` ve `preprocessing.yaml`, temiz checkout için gerekli olduklarından sürüm kapsamına dahil edilecek.
+- Doğrulama: 41 test geçti; Ruff, format ve diff kontrolleri temiz.

@@ -1,0 +1,19 @@
+mode: none
+
+gamma:
+  value: 0.8
+
+clahe:
+  clip_limit: 2.0
+  tile_grid: [8, 8]
+
+denoise:
+  method: bilateral
+  d: 5
+  sigma_color: 50
+  sigma_space: 50
+
+chain: [gamma, clahe]
+
+router:
+  enabled: false

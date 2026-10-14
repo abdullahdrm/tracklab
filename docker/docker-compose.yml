@@ -1,0 +1,25 @@
+services:
+  tracklab:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: tracklab:0.1.0
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      TRACKLAB_DATABASE_URL: sqlite:////app/data/tracklab.sqlite3
+      TRACKLAB_UPLOAD_DIR: /app/data/uploads
+      TRACKLAB_OUTPUT_DIR: /app/outputs/jobs
+      TRACKLAB_CONFIG_PATH: /app/configs/pipeline.yaml
+      TRACKLAB_MAX_UPLOAD_BYTES: "524288000"
+      TRACKLAB_MAX_VIDEO_DURATION_SECONDS: "600"
+      YOLO_CONFIG_DIR: /tmp/Ultralytics
+      MPLCONFIGDIR: /tmp/matplotlib
+      HOME: /tmp
+    user: "${TRACKLAB_UID:-1000}:${TRACKLAB_GID:-1000}"
+    volumes:
+      - ../data:/app/data
+      - ../outputs:/app/outputs
+      - ../models:/app/models:ro
+    init: true
+    restart: unless-stopped

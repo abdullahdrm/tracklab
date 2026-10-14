@@ -165,3 +165,25 @@ Kurallar:
 - [ ] Testler ve CI yeşil
 - [ ] README, MODEL_CARD, DATA_LICENSES, LICENSE mevcut
 - [ ] Demo videosu hazır
+
+
+## v0.1.1: Sağlamlaştırma ve dağıtım
+
+- [x] API yeniden başladığında yarım kalan queued/running işler failed olarak işaretleniyor.
+- [x] Video pipeline hatalarında geçici ham video dosyası temizleniyor.
+- [x] Yüklenen kaynak video, iş tamamlandığında veya başarısız olduğunda siliniyor; reddedilen yüklemeler de temizleniyor.
+- [x] Varsayılan tracker/model, video çalıştırması başına yalnızca bir kez oluşturuluyor.
+- [x] API çıktı dosyalarının izin verilen çıktı klasörünün dışına erişmesi engelleniyor.
+- [x] Video doğrulaması asenkron API event loop'unu bloke etmeyecek şekilde çalıştırılıyor.
+- [x] API hata mesajlarında dahili dosya yolları maskeleniyor.
+- [x] SQLite bağlantı ayarları ve isteğe bağlı PostgreSQL bağımlılığı düzenlendi.
+- [x] JSON serileştirme ve görüntü sınırındaki kutu çizimi için testler eklendi.
+- [x] Kaynak video saklama davranışı README'de belgelendi.
+- [x] Yerel doğrulama: 52 test geçti; Ruff lint, format ve diff kontrolleri başarılı.
+- [x] `tracklab:0.1.1` Docker imajı oluşturuldu ve ayrı portta denendi.
+- [x] Gerçek video testi: 505 kare, 4.890 tespit, 145 benzersiz takip ID'si; JSON ve MP4 çıktıları doğrulandı.
+- [x] Ana Docker Compose servisi `tracklab:0.1.1` sürümüne geçirildi ve `/health` kontrolü doğrulandı.
+- [x] Mevcut veritabanındaki 7 iş kaydının korunduğu doğrulandı.
+- [x] `v0.1.1` etiketi oluşturuldu; aktif Git commit/etiket geçmişinden kurumsal e-posta adresi kaldırıldı.
+
+**Hafta 1 kapanış durumu:** Yerel geliştirme, test, Docker dağıtımı ve sürümleme tamamlandı. GitHub Actions'ın gerçek çalıştırması henüz doğrulanmadı; yerel depoda uzak Git remote tanımlı değil.

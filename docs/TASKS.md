@@ -52,10 +52,10 @@ Kurallar:
 **Bitti ölçütü:** `POST /jobs` sonrası iş `done` oluyor; test yeşil.
 
 ### Gün 4: Yükleme sayfası ve video uyumu
-- [ ] `api/static/index.html`
-- [ ] H.264 yeniden kodlama (`io/video.py`, ffmpeg)
-- [ ] Boyut/süre sınırları ve hata durumları
-- [ ] Commit
+- [x] `api/static/index.html`
+- [x] H.264 yeniden kodlama (`io/video.py`, ffmpeg)
+- [x] Boyut/süre sınırları ve hata durumları
+- [x] Commit
 
 **Bitti ölçütü:** Tarayıcıda video yüklenip sonuç oynatılabiliyor.
 

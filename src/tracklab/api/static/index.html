@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TrackLab — Video Analizi</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6fa;
+      --surface: #fff;
+      --text: #182230;
+      --muted: #667085;
+      --line: #dfe5ee;
+      --accent: #315ee7;
+      --accent-hover: #2449bc;
+      --success: #16794b;
+      --danger: #b42318;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      padding: 18px 24px;
+    }
+    .header-inner, main {
+      width: min(960px, calc(100% - 32px));
+      margin: auto;
+    }
+    .brand { font-size: 21px; font-weight: 750; letter-spacing: -0.5px; }
+    .brand span { color: var(--accent); }
+    .subtitle { color: var(--muted); font-size: 13px; margin-top: 2px; }
+    main { padding: 38px 0 56px; }
+    h1 { margin: 0 0 8px; font-size: clamp(26px, 4vw, 36px); letter-spacing: -1px; }
+    h2 { margin: 0 0 16px; font-size: 19px; }
+    p { margin-top: 0; }
+    .intro { color: var(--muted); margin-bottom: 26px; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 14px rgb(20 35 65 / 4%);
+    }
+    .dropzone {
+      display: block;
+      text-align: center;
+      padding: 30px 20px;
+      border: 2px dashed #b9c7e3;
+      border-radius: 12px;
+      background: #f9faff;
+      cursor: pointer;
+    }
+    .dropzone:hover { border-color: var(--accent); background: #f3f6ff; }
+    .upload-icon { font-size: 30px; margin-bottom: 8px; }
+    .drop-title { font-weight: 650; }
+    .hint { color: var(--muted); font-size: 13px; margin-top: 7px; }
+    #selectedFile { color: var(--muted); font-size: 14px; margin-top: 12px; }
+    button, .button {
+      appearance: none;
+      display: inline-block;
+      border: 0;
+      border-radius: 9px;
+      padding: 11px 16px;
+      font: inherit;
+      font-weight: 650;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .primary { background: var(--accent); color: white; margin-top: 18px; }
+    .primary:hover { background: var(--accent-hover); }
+    button:disabled { opacity: .55; cursor: wait; }
+    .secondary { color: var(--text); background: #edf1f7; }
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      background: #edf1f7;
+    }
+    .badge.done { color: var(--success); background: #e6f6ee; }
+    .badge.failed { color: var(--danger); background: #fdecea; }
+    .muted { color: var(--muted); }
+    .hidden { display: none !important; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 22px 0;
+    }
+    .stat { padding: 16px; background: #f6f8fc; border-radius: 10px; }
+    .stat-label { color: var(--muted); font-size: 13px; }
+    .stat-value { font-size: 26px; font-weight: 750; margin-top: 3px; overflow-wrap: anywhere; }
+    video { width: 100%; max-height: 65vh; background: #101828; border-radius: 10px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+    .error { color: var(--danger); background: #fff0ef; padding: 12px; border-radius: 8px; white-space: pre-wrap; }
+    .job-id { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; margin-top: 8px; }
+    footer { color: var(--muted); font-size: 13px; text-align: center; margin-top: 28px; }
+    footer a { color: var(--accent); }
+    @media (max-width: 560px) {
+      main { padding-top: 24px; }
+      .card { padding: 18px; }
+      .stats { grid-template-columns: 1fr; }
+      .stat-value { font-size: 23px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="brand">Track<span>Lab</span></div>
+      <div class="subtitle">Video object tracking & analytics</div>
+    </div>
+  </header>
+
+  <main>
+    <h1>Video analizi</h1>
+    <p class="intro">
+      Bir video yükle. TrackLab nesneleri tespit etsin, takip ID'lerini
+      oluştursun ve sonuçları indirilebilir dosyalar halinde hazırlasın.
+    </p>
+
+    <section class="card">
+      <h2>1. Video seç</h2>
+      <form id="uploadForm">
+        <label class="dropzone" for="videoFile">
+          <div class="upload-icon" aria-hidden="true">↑</div>
+          <div class="drop-title">Video dosyanı seçmek için tıkla</div>
+          <div class="hint">MP4, MOV, AVI veya MKV · En fazla 500 MB · En fazla 10 dakika</div>
+          <input
+            id="videoFile"
+            name="file"
+            type="file"
+            accept=".mp4,.mov,.avi,.mkv,video/*"
+            required
+            hidden
+          >
+        </label>
+        <div id="selectedFile" aria-live="polite">Henüz dosya seçilmedi.</div>
+        <button id="submitButton" class="primary" type="submit">
+          Analizi başlat
+        </button>
+      </form>
+      <div id="uploadError" class="error hidden" role="alert"></div>
+    </section>
+
+    <section id="jobCard" class="card hidden" aria-live="polite">
+      <div class="status-row">
+        <h2 style="margin:0">2. Analiz durumu</h2>
+        <span id="statusBadge" class="badge">Hazırlanıyor</span>
+      </div>
+      <div id="statusMessage" class="muted" style="margin-top:10px">
+        İş kaydediliyor…
+      </div>
+      <div id="jobId" class="job-id"></div>
+      <div id="jobError" class="error hidden" style="margin-top:16px"></div>
+
+      <div id="summary" class="stats hidden">
+        <div class="stat">
+          <div class="stat-label">İşlenen kare</div>
+          <div id="framesCount" class="stat-value">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Toplam tespit</div>
+          <div id="detectionsCount" class="stat-value">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Benzersiz takip ID'si</div>
+          <div id="tracksCount" class="stat-value">—</div>
+        </div>
+      </div>
+
+      <div id="resultSection" class="hidden">
+        <h2 style="margin-top:24px">3. İşlenmiş video</h2>
+        <p class="muted">
+          Bu video, orijinal dosyadan ayrıdır ve kutu, sınıf etiketi
+          ve takip ID'lerini içerir.
+        </p>
+        <video id="resultVideo" controls playsinline preload="metadata"></video>
+        <div class="actions">
+          <a id="videoDownload" class="button primary" href="#">MP4 indir</a>
+          <a id="jsonDownload" class="button secondary" href="#">JSON sonuçlarını indir</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <a href="/docs" target="_blank" rel="noreferrer">API dokümantasyonu</a>
+      · TrackLab 0.1.0
+    </footer>
+  </main>
+
+  <script>
+    const form = document.getElementById("uploadForm");
+    const fileInput = document.getElementById("videoFile");
+    const submitButton = document.getElementById("submitButton");
+    const selectedFile = document.getElementById("selectedFile");
+    const uploadError = document.getElementById("uploadError");
+    const jobCard = document.getElementById("jobCard");
+    const statusBadge = document.getElementById("statusBadge");
+    const statusMessage = document.getElementById("statusMessage");
+    const jobIdElement = document.getElementById("jobId");
+    const jobError = document.getElementById("jobError");
+    const summary = document.getElementById("summary");
+    const resultSection = document.getElementById("resultSection");
+    const resultVideo = document.getElementById("resultVideo");
+
+    const maxBytes = 500 * 1024 * 1024;
+    const maxDurationSeconds = 10 * 60;
+    const allowedExtensions = [".mp4", ".mov", ".avi", ".mkv"];
+    let activeJobId = null;
+
+    function formatBytes(bytes) {
+      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
+    // Best-effort check. The API remains the authoritative validator.
+    function readVideoDuration(file) {
+      return new Promise((resolve) => {
+        const video = document.createElement("video");
+        const objectUrl = URL.createObjectURL(file);
+        let timeoutId;
+        let settled = false;
+
+        const finish = (duration) => {
+          if (settled) return;
+          settled = true;
+          window.clearTimeout(timeoutId);
+          video.onloadedmetadata = null;
+          video.onerror = null;
+          video.removeAttribute("src");
+          video.load();
+          URL.revokeObjectURL(objectUrl);
+          resolve(Number.isFinite(duration) && duration > 0 ? duration : null);
+        };
+
+        video.preload = "metadata";
+        video.onloadedmetadata = () => finish(video.duration);
+        video.onerror = () => finish(null);
+        timeoutId = window.setTimeout(() => finish(null), 5000);
+        video.src = objectUrl;
+      });
+    }
+
+    function showError(element, message) {
+      element.textContent = message;
+      element.classList.remove("hidden");
+    }
+
+    function hideError(element) {
+      element.textContent = "";
+      element.classList.add("hidden");
+    }
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files[0];
+      selectedFile.textContent = file
+        ? `${file.name} · ${formatBytes(file.size)}`
+        : "Henüz dosya seçilmedi.";
+      hideError(uploadError);
+    });
+
+    function renderStatus(job) {
+      const labels = {
+        queued: "Kuyrukta",
+        running: "Analiz ediliyor",
+        done: "Tamamlandı",
+        failed: "Başarısız"
+      };
+
+      statusBadge.textContent = labels[job.status] || job.status;
+      statusBadge.className = "badge";
+      if (job.status === "done") statusBadge.classList.add("done");
+      if (job.status === "failed") statusBadge.classList.add("failed");
+
+      if (job.status === "queued") {
+        statusMessage.textContent = "İş kuyruğa alındı; analiz başlayacak.";
+      } else if (job.status === "running") {
+        statusMessage.textContent = "Video işleniyor. Bu işlem videonun uzunluğuna ve donanıma göre sürebilir.";
+      } else if (job.status === "done") {
+        statusMessage.textContent = "Analiz tamamlandı. Sonuçları aşağıda görüntüleyebilir ve indirebilirsin.";
+      } else if (job.status === "failed") {
+        statusMessage.textContent = "Analiz tamamlanamadı.";
+        if (job.error) showError(jobError, job.error);
+      }
+    }
+
+    async function pollJob(jobId) {
+      if (activeJobId !== jobId) return;
+
+      try {
+        const response = await fetch(`/jobs/${encodeURIComponent(jobId)}`);
+        const job = await response.json();
+
+        if (!response.ok) {
+          throw new Error(job.detail || "İş durumu alınamadı.");
+        }
+
+        renderStatus(job);
+
+        if (job.status === "done") {
+          submitButton.disabled = false;
+          if (job.summary) {
+            document.getElementById("framesCount").textContent =
+              job.summary.processed_frames ?? "—";
+            document.getElementById("detectionsCount").textContent =
+              job.summary.total_detections ?? "—";
+            document.getElementById("tracksCount").textContent =
+              job.summary.unique_tracks ?? "—";
+            summary.classList.remove("hidden");
+          }
+
+          if (job.video_available) {
+            const base = `/jobs/${encodeURIComponent(jobId)}`;
+            resultVideo.src = `${base}/preview`;
+            document.getElementById("videoDownload").href = `${base}/video`;
+            resultSection.classList.remove("hidden");
+          }
+
+          if (job.json_available) {
+            document.getElementById("jsonDownload").href =
+              `/jobs/${encodeURIComponent(jobId)}/result`;
+          }
+
+          return;
+        }
+
+        if (job.status === "failed") {
+          submitButton.disabled = false;
+          return;
+        }
+
+        window.setTimeout(() => pollJob(jobId), 1500);
+      } catch (error) {
+        statusMessage.textContent =
+          `Durum kontrol edilemedi: ${error.message}. Yeniden denenecek…`;
+        window.setTimeout(() => pollJob(jobId), 3000);
+      }
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      hideError(uploadError);
+      hideError(jobError);
+
+      const file = fileInput.files[0];
+      if (!file) {
+        showError(uploadError, "Önce bir video dosyası seç.");
+        return;
+      }
+
+      const extension = "." + file.name.split(".").pop().toLowerCase();
+      if (!allowedExtensions.includes(extension)) {
+        showError(uploadError, "Bu dosya türü desteklenmiyor.");
+        return;
+      }
+      if (file.size > maxBytes) {
+        showError(uploadError, "Dosya 500 MB sınırını aşıyor.");
+        return;
+      }
+      if (file.size === 0) {
+        showError(uploadError, "Seçilen dosya boş.");
+        return;
+      }
+
+      const durationSeconds = await readVideoDuration(file);
+      if (durationSeconds !== null && durationSeconds > maxDurationSeconds) {
+        showError(uploadError, "Video 10 dakika sınırını aşıyor.");
+        return;
+      }
+
+      submitButton.disabled = true;
+      submitButton.textContent = "Yükleniyor…";
+      jobCard.classList.remove("hidden");
+      resultSection.classList.add("hidden");
+      summary.classList.add("hidden");
+      statusBadge.className = "badge";
+      statusBadge.textContent = "Yükleniyor";
+      statusMessage.textContent = "Video sunucuya yükleniyor…";
+      jobIdElement.textContent = "";
+      resultVideo.removeAttribute("src");
+      resultVideo.load();
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const response = await fetch("/jobs", {
+          method: "POST",
+          body: formData
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.detail || "Video yüklenemedi.");
+        }
+
+        activeJobId = data.id;
+        jobIdElement.textContent = `İş ID: ${data.id}`;
+        statusMessage.textContent = "İş oluşturuldu; durum kontrol ediliyor…";
+        await pollJob(data.id);
+      } catch (error) {
+        showError(uploadError, error.message);
+        submitButton.disabled = false;
+      } finally {
+        submitButton.textContent = "Analizi başlat";
+      }
+    });
+  </script>
+</body>
+</html>

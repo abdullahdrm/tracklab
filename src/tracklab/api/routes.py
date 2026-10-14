@@ -17,6 +17,7 @@ from fastapi.responses import FileResponse
 
 from tracklab.api.models import Job, utc_now
 from tracklab.api.schemas import JobResponse
+from tracklab.io.video import probe_video, read_frames
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -127,6 +128,37 @@ async def create_job(
             raise HTTPException(
                 status_code=400,
                 detail="The uploaded file is empty",
+            )
+
+        # Check that the upload is a readable video before queuing work.
+        try:
+            video_meta = probe_video(upload_path)
+            frame_iterator = read_frames(upload_path)
+            try:
+                first_frame = next(frame_iterator, None)
+            finally:
+                frame_iterator.close()
+        except (FileNotFoundError, ValueError) as exc:
+            raise HTTPException(
+                status_code=400,
+                detail="Uploaded file is not a valid, readable video.",
+            ) from exc
+
+        if first_frame is None or video_meta.frame_count <= 0:
+            raise HTTPException(
+                status_code=400,
+                detail="Uploaded video contains no readable frames.",
+            )
+
+        duration_seconds = video_meta.frame_count / video_meta.fps
+        if duration_seconds > settings.max_video_duration_seconds:
+            raise HTTPException(
+                status_code=422,
+                detail=(
+                    f"Video duration ({duration_seconds:.1f}s) exceeds the "
+                    "maximum allowed duration "
+                    f"({settings.max_video_duration_seconds:.1f}s)."
+                ),
             )
 
         job = Job(

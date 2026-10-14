@@ -1,5 +1,6 @@
 """Environment-based settings for the TrackLab API."""
 
+import math
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -14,6 +15,7 @@ class ApiSettings:
     output_dir: Path = Path("outputs/jobs")
     config_path: Path = Path("configs/pipeline.yaml")
     max_upload_bytes: int = 500 * 1024 * 1024
+    max_video_duration_seconds: float = 600.0
     allowed_extensions: tuple[str, ...] = (
         ".mp4",
         ".mov",
@@ -24,6 +26,11 @@ class ApiSettings:
     def __post_init__(self) -> None:
         if self.max_upload_bytes <= 0:
             raise ValueError("max_upload_bytes must be positive")
+        if (
+            not math.isfinite(self.max_video_duration_seconds)
+            or self.max_video_duration_seconds <= 0
+        ):
+            raise ValueError("max_video_duration_seconds must be positive and finite")
 
     @classmethod
     def from_env(cls) -> "ApiSettings":
@@ -47,5 +54,8 @@ class ApiSettings:
                     "TRACKLAB_MAX_UPLOAD_BYTES",
                     str(500 * 1024 * 1024),
                 )
+            ),
+            max_video_duration_seconds=float(
+                os.getenv("TRACKLAB_MAX_VIDEO_DURATION_SECONDS", "600")
             ),
         )

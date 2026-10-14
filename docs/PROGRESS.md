@@ -23,3 +23,12 @@
 - SQLite kaydının uygulama yeniden oluşturulduktan sonra okunması doğrulandı.
 - Doğrulama: 38 test geçti; Ruff lint, format ve diff kontrolleri temiz.
 - Not: Starlette/httpx deprecation uyarısı sürüyor; test başarısını etkilemiyor.
+
+## 2026-10-14: Gün 4
+- Tarayıcı arayüzü ve MP4/JSON indirme akışı hazır.
+- FFmpeg ile H.264 MP4 çıktısı ve faststart uyumluluğu mevcut.
+- API tarafında varsayılan 10 dakika video süresi ve 500 MB yükleme sınırı uygulanıyor.
+- Boş, bozuk, desteklenmeyen uzantılı ve süre sınırını aşan yüklemeler test edildi.
+- Arayüzde dosya türü, boyut ve desteklenen durumlarda video süresi için erken kontrol eklendi.
+- Doğrulama: 41 test geçti; Ruff, format ve diff kontrolleri temiz.
+- Not: Starlette/httpx deprecation uyarısı sürüyor; test başarısını etkilemiyor.

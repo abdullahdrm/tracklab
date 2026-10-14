@@ -56,6 +56,8 @@ def _fake_transcode(source: str | Path, destination: str | Path) -> Path:
 def make_app(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch | None = None,
+    *,
+    max_video_duration_seconds: float = 600.0,
 ):
     """Build an isolated app with a temporary database and fake tracker."""
 
@@ -68,6 +70,7 @@ def make_app(
         output_dir=tmp_path / "outputs",
         config_path=PROJECT_ROOT / "configs" / "pipeline.yaml",
         max_upload_bytes=2 * 1024 * 1024,
+        max_video_duration_seconds=max_video_duration_seconds,
     )
 
     return create_app(
@@ -253,3 +256,47 @@ def test_processing_failure_is_persisted(
     assert status["error"] == "RuntimeError: synthetic processing failure"
     assert status["completed_at"] is not None
     assert result_response.status_code == 409
+
+
+def test_rejects_corrupt_video_upload(tmp_path: Path) -> None:
+    app = make_app(tmp_path)
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/jobs",
+            files={"file": ("corrupt.mp4", b"not a real video", "video/mp4")},
+        )
+
+    assert response.status_code == 400
+    assert "valid, readable video" in response.json()["detail"]
+    assert list((tmp_path / "uploads").iterdir()) == []
+
+
+def test_rejects_video_exceeding_duration_limit(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    video_bytes = create_video(tmp_path / "long-enough.mp4")
+    app = make_app(
+        tmp_path,
+        monkeypatch,
+        max_video_duration_seconds=0.2,
+    )
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/jobs",
+            files={"file": ("long-enough.mp4", video_bytes, "video/mp4")},
+        )
+
+    assert response.status_code == 422
+    assert "maximum allowed duration" in response.json()["detail"]
+    assert list((tmp_path / "uploads").iterdir()) == []
+
+
+def test_api_settings_rejects_invalid_duration_limit() -> None:
+    with pytest.raises(ValueError, match="max_video_duration_seconds"):
+        ApiSettings(max_video_duration_seconds=0)
+
+    with pytest.raises(ValueError, match="max_video_duration_seconds"):
+        ApiSettings(max_video_duration_seconds=float("inf"))

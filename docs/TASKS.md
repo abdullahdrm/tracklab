@@ -186,4 +186,4 @@ Kurallar:
 - [x] Mevcut veritabanındaki 7 iş kaydının korunduğu doğrulandı.
 - [x] `v0.1.1` etiketi oluşturuldu; aktif Git commit/etiket geçmişinden kurumsal e-posta adresi kaldırıldı.
 
-**Hafta 1 kapanış durumu:** Yerel geliştirme, test, Docker dağıtımı ve sürümleme tamamlandı. GitHub Actions'ın gerçek çalıştırması henüz doğrulanmadı; yerel depoda uzak Git remote tanımlı değil.
+**Hafta 1 kapanış durumu:** Yerel geliştirme, test, Docker dağıtımı ve sürümleme tamamlandı. GitHub Actions, GitHub üzerindeki master commit'inde çalıştırıldı; lint, format ve test adımlarının tamamı başarılı.

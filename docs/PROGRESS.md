@@ -62,4 +62,4 @@
 - Git geçmişi ve etiket metadata'sından kurumsal e-posta adresi kaldırıldı; yeni depo yerel Git kimliği `noreply@localhost` olarak ayarlandı.
 - `v0.1.1` sürüm etiketi doğrulandı ve çalışma ağacı temiz.
 
-**CI notu:** GitHub Actions workflow'u yapılandırıldı; ancak depoda uzak Git remote olmadığı için GitHub üzerinde gerçek bir workflow çalıştırması henüz gözlemlenmedi.
+**CI notu:** GitHub Actions, GitHub üzerindeki `master` commit'inde çalıştı; lint, format ve test adımlarının tamamı başarılı.

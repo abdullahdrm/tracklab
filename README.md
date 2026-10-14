@@ -6,7 +6,7 @@
 
 **TrackLab is a video object-detection and multi-object-tracking application built around Ultralytics YOLO and ByteTrack.** It provides a reusable Python processing pipeline, a command-line interface, and a FastAPI web service for processing videos and retrieving annotated results.
 
-The current release is **v0.1.1**. Development so far has focused on building a reliable end-to-end application with testable components, configurable inference, API integration, and containerized deployment.
+The current release is **v0.1.1**. Development so far has focused on building a reliable end-to-end application with configurable inference, testable components, API integration, and containerized deployment.
 
 ## Overview
 
@@ -15,22 +15,22 @@ TrackLab processes a video frame by frame, detects objects, maintains track iden
 ### Current capabilities
 
 - **Object detection:** YOLO inference with configurable model, confidence threshold, IoU threshold, input resolution, and class selection.
-- **Multi-object tracking:** ByteTrack integration with persistent track identities across video frames.
+- **Multi-object tracking:** ByteTrack integration with persistent track identities across consecutive frames.
 - **Video processing:** Frame reading, bounding-box visualization, and H.264 MP4 output.
-- **Structured results:** JSON output containing video metadata, processing configuration, summary statistics, and optional per-frame tracking results.
-- **MOT export:** Optional text output in MOTChallenge-style detection format.
+- **Structured results:** JSON output containing video metadata, summary statistics, processing configuration, and optional per-frame tracking results.
+- **MOT export:** Optional text output in MOTChallenge-style format.
 - **Web application:** Browser-based video upload and result retrieval through FastAPI.
 - **Job management:** Persistent job status and summary records backed by SQLAlchemy and SQLite.
-- **Input validation:** Checks for supported file extensions, upload size, video readability, and duration.
+- **Input validation:** Checks for supported file types, upload size, video readability, and duration.
 - **Deployment and testing:** Docker Compose support, unit tests, API integration tests, and GitHub Actions CI.
 
 ## Architecture
 
-The command-line interface and web application share the same video-processing pipeline. The API adds upload validation, job persistence, background execution, and endpoints for accessing generated artifacts.
+The command-line interface and web application share the same video-processing pipeline. The API adds upload validation, job persistence, background execution, and endpoints for retrieving generated artifacts.
 
-\`\`\`mermaid
+```mermaid
 flowchart TD
-    CLI["CLI"] --> Pipeline["VideoPipeline"]
+    CLI["Command-line interface"] --> Pipeline["VideoPipeline"]
     Browser["Browser UI"] --> API["FastAPI"]
     API --> Validation["Upload validation"]
     Validation --> Job["SQLAlchemy / SQLite"]
@@ -40,7 +40,7 @@ flowchart TD
     Config["Validated YAML configuration"] --> Pipeline
     Pipeline --> Reader["Video frame reader"]
     Reader --> Tracker["YOLO + ByteTrack"]
-    Tracker --> Visualization["Bounding-box and track visualization"]
+    Tracker --> Visualization["Bounding boxes and track IDs"]
     Visualization --> Encoder["FFmpeg H.264 encoding"]
     Encoder --> MP4["Annotated MP4"]
 
@@ -52,7 +52,7 @@ flowchart TD
     JSON --> Artifacts
     MOT --> Artifacts
     Artifacts --> API
-\`\`\`
+```
 
 ### Technology stack
 
@@ -76,11 +76,11 @@ flowchart TD
 - Python 3.12
 - FFmpeg
 - YOLO11n model weights
-- Docker Desktop or another Docker Engine, if using the container deployment
+- Docker Desktop or another Docker Engine, if using container deployment
 
 ### 1. Clone and install
 
-\`\`\`bash
+```bash
 git clone https://github.com/abdullahdrm/tracklab.git
 cd tracklab
 
@@ -89,47 +89,45 @@ source .venv/bin/activate
 
 python -m pip install --upgrade pip
 python -m pip install -e ".[dev]"
-\`\`\`
+```
 
 Install FFmpeg if it is not already available.
 
 **macOS:**
 
-\`\`\`bash
+```bash
 brew install ffmpeg
-\`\`\`
+```
 
 **Ubuntu/Debian:**
 
-\`\`\`bash
+```bash
 sudo apt-get update
 sudo apt-get install --no-install-recommends -y ffmpeg
-\`\`\`
+```
 
 ### 2. Download the model weights
 
 Model weights are not committed to the repository. Download the official YOLO11n asset into the expected location:
 
-\`\`\`bash
+```bash
 mkdir -p models
-curl -fL 
-  https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11n.pt 
+curl -fL \
+  https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11n.pt \
   -o models/yolo11n.pt
-\`\`\`
+```
 
 Review the applicable Ultralytics licensing terms before redistributing model weights or deploying a solution that uses them.
 
 ### 3. Process a video
 
-Run the CLI from the repository root:
+Run the CLI from the repository root, replacing the input path with a video on your machine:
 
-\`\`\`bash
-python scripts/run_video.py /path/to/video.mp4 
-  --config configs/pipeline.yaml 
+```bash
+python scripts/run_video.py /path/to/video.mp4 \
+  --config configs/pipeline.yaml \
   --output-dir outputs/demo
-\`\`\`
-
-Replace `/path/to/video.mp4` with the path to a video on your machine.
+```
 
 Depending on the configured output settings, the pipeline can generate:
 
@@ -141,15 +139,15 @@ Depending on the configured output settings, the pipeline can generate:
 
 ### 4. Start the API
 
-\`\`\`bash
+```bash
 uvicorn tracklab.api.main:app --host 127.0.0.1 --port 8000
-\`\`\`
+```
 
-Open the following endpoints in your browser:
+Open these endpoints in your browser:
 
-- **Web interface:** http://127.0.0.1:8000/
-- **Interactive API documentation:** http://127.0.0.1:8000/docs
-- **Health check:** http://127.0.0.1:8000/health
+- **Web interface:** <http://127.0.0.1:8000/>
+- **Interactive API documentation:** <http://127.0.0.1:8000/docs>
+- **Health check:** <http://127.0.0.1:8000/health>
 
 ### API endpoints
 
@@ -170,20 +168,20 @@ Uploaded source videos are temporary and are deleted after successful or failed 
 
 Ensure that `models/yolo11n.pt` exists. From the repository root, run:
 
-\`\`\`bash
+```bash
 export TRACKLAB_UID="$(id -u)"
 export TRACKLAB_GID="$(id -g)"
 
 docker compose -f docker/docker-compose.yml up --build
-\`\`\`
+```
 
-The service binds to localhost on port `8000`. Once the container is healthy, open http://127.0.0.1:8000/.
+The service binds to localhost on port `8000`. Once the container is healthy, open <http://127.0.0.1:8000/>.
 
 Stop the service with:
 
-\`\`\`bash
+```bash
 docker compose -f docker/docker-compose.yml down
-\`\`\`
+```
 
 ### Persistent directories
 
@@ -199,7 +197,7 @@ The container uses CPU inference. Apple MPS acceleration is available when runni
 
 The main configuration file is `configs/pipeline.yaml`. It references component YAML files relative to its own directory.
 
-| Configuration | Purpose |
+| Configuration file | Purpose |
 |---|---|
 | `configs/detector.yaml` | YOLO model path, input resolution, confidence and IoU thresholds, classes, and device |
 | `configs/bytetrack.yaml` | ByteTrack thresholds, track buffer, and matching settings |
@@ -213,13 +211,13 @@ The main configuration file is `configs/pipeline.yaml`. It references component 
 
 Install the development dependencies, then run:
 
-\`\`\`bash
+```bash
 python -m pytest -q
 ruff check src/tracklab scripts tests
 ruff format --check src/tracklab scripts tests
-\`\`\`
+```
 
-GitHub Actions runs lint, formatting, and test checks on pushes and pull requests targeting `master`.
+The project includes unit and API integration tests. GitHub Actions runs lint, formatting, and test checks on pushes and pull requests targeting `master`.
 
 ## Scope and limitations
 

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tracklab"
-version = "0.1.0"
+version = "0.1.1"
 description = "YOLO and ByteTrack-based object tracking and video analytics pipeline"
 readme = "README.md"
 license = "AGPL-3.0-only"

@@ -43,11 +43,11 @@ Kurallar:
 **Bitti ölçütü:** `run_video.py` örnek videoda ID'li MP4 + JSON üretiyor.
 
 ### Gün 3: FastAPI servisi
-- [ ] `api/settings.py`, `api/models.py`
-- [ ] `api/service.py` (JobManager)
-- [ ] `api/routes.py`, `api/main.py`
-- [ ] `tests/integration/test_api.py` (sahte tracker ile)
-- [ ] Commit
+- [x] `api/settings.py`, `api/models.py`
+- [x] `api/service.py` (JobManager)
+- [x] `api/routes.py`, `api/main.py`
+- [x] `tests/integration/test_api.py` (sahte tracker ile)
+- [x] Commit
 
 **Bitti ölçütü:** `POST /jobs` sonrası iş `done` oluyor; test yeşil.
 

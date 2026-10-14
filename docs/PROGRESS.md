@@ -15,3 +15,11 @@
 - AGPL-3.0 lisans dosyası ve proje metadata'sı eklendi.
 - Doğrulama: 35 test geçti; Ruff kontrolleri ve biçim kontrolü başarılı.
 - Not: Testlerde httpx/Starlette deprecation uyarısı var; test başarısını etkilemiyor.
+
+## 2026-10-14: Gün 3
+- FastAPI iş akışı ve SQLAlchemy tabanlı kalıcı iş kayıtları doğrulandı.
+- Başarılı ve başarısız iş durumları test edildi.
+- Boş dosya, desteklenmeyen uzantı ve aşırı büyük yükleme reddi doğrulandı.
+- SQLite kaydının uygulama yeniden oluşturulduktan sonra okunması doğrulandı.
+- Doğrulama: 38 test geçti; Ruff lint, format ve diff kontrolleri temiz.
+- Not: Starlette/httpx deprecation uyarısı sürüyor; test başarısını etkilemiyor.

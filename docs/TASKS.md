@@ -1,0 +1,167 @@
+# TrackLab: Görev Listesi
+
+Repoda `docs/TASKS.md` olarak durur. Bir görevi bitirince `[ ]` işaretini `[x]` yap
+(VS Code'da önizleme: Cmd+Shift+V). Kısa notlar için `docs/PROGRESS.md` kullanılır.
+Ayrıntılar `docs/PROJECT_PLAN.md` (devir belgesi) içindedir.
+
+Kurallar:
+- Her gün sonunda commit at.
+- Hold-out sekanslarına (02, 10, 13) yalnızca **Gün 17**'de bakılır.
+- Her aşamanın sonunda "Bitti ölçütü" sağlanmadan sonrakine geçme.
+
+---
+
+## Hafta 1: Uçtan uca iskelet (v0.1)
+
+### Gün 1: Kurulum
+- [x] `~/Desktop/tracklab` klasörü ve `git init`
+- [ ] Python 3.12 kurulu (`python3.12 --version`)
+- [ ] `.venv` 3.12 ile yeniden oluşturuldu
+- [ ] `pip install ultralytics ipykernel`; MPS kontrolü `True`
+- [ ] Proje kökünde `.gitignore` var (içinde `.venv/` dahil)
+- [ ] Klasör iskeleti: `src/tracklab`, `scripts`, `data`, `outputs`, `tests`, `notebooks`
+- [ ] `notebooks/00_sanity_check.ipynb` 3.12 kernel ile çalışıyor
+- [ ] `data/sample.mp4` (Pexels'ten 10-20 sn yaya videosu)
+- [ ] `yolo track ...` komutu çalıştı, ID'ler tutarlı mı kontrol edildi
+- [ ] İlk commit: `Initial project setup`
+
+**Bitti ölçütü:** CLI ile ID'li takip videosu üretildi, ilk commit atıldı.
+
+### Gün 2: Kendi script'imiz (ID'li MP4 + JSON)
+- [ ] `LICENSE` kararı (öneri: AGPL-3.0)
+- [ ] `src/tracklab/schemas.py`
+- [ ] `src/tracklab/config.py` ve `configs/pipeline.yaml`, `detector.yaml`, `bytetrack.yaml`
+- [ ] `src/tracklab/io/video.py` (kare okuma/yazma)
+- [ ] `src/tracklab/io/results.py` (JSON)
+- [ ] `src/tracklab/viz/draw.py`
+- [ ] `src/tracklab/tracking/yolo_bytetrack.py`
+- [ ] `src/tracklab/pipeline.py`
+- [ ] `scripts/run_video.py`
+- [ ] `tests/unit/test_results_io.py`
+- [ ] Commit
+
+**Bitti ölçütü:** `run_video.py` örnek videoda ID'li MP4 + JSON üretiyor.
+
+### Gün 3: FastAPI servisi
+- [ ] `api/settings.py`, `api/models.py`
+- [ ] `api/service.py` (JobManager)
+- [ ] `api/routes.py`, `api/main.py`
+- [ ] `tests/integration/test_api.py` (sahte tracker ile)
+- [ ] Commit
+
+**Bitti ölçütü:** `POST /jobs` sonrası iş `done` oluyor; test yeşil.
+
+### Gün 4: Yükleme sayfası ve video uyumu
+- [ ] `api/static/index.html`
+- [ ] H.264 yeniden kodlama (`io/video.py`, ffmpeg)
+- [ ] Boyut/süre sınırları ve hata durumları
+- [ ] Commit
+
+**Bitti ölçütü:** Tarayıcıda video yüklenip sonuç oynatılabiliyor.
+
+### Gün 5: Docker ve ilk sürüm
+- [ ] `docker/Dockerfile`, `docker/docker-compose.yml`
+- [ ] `README.md` ilk sürüm
+- [ ] Taslak `ci.yml`
+- [ ] `v0.1` etiketi
+
+**Bitti ölçütü:** `docker compose up` ile aynı akış çalışıyor.
+
+---
+
+## Hafta 2: Ölçüm ve ön işleme
+
+### Gün 6: MOT17 verisi
+- [ ] MOT17 indirildi (`data/raw/MOT17`), lisans notu `DATA_LICENSES.md`'ye eklendi
+- [ ] `datasets/mot17.py`, `datasets/splits.py`
+- [ ] `scripts/prepare_mot17.py`
+- [ ] `tests/unit/test_splits.py`, `test_mot17_reader.py`
+
+**Bitti ölçütü:** Split manifesti hazır (tuning: 04, 05, 09, 11 / hold-out: 02, 10, 13).
+
+### Gün 7: TrackEval
+- [ ] `third_party/TrackEval` kuruldu
+- [ ] `evaluation/trackeval_bridge.py`
+- [ ] **E0:** GT'yi tahmin olarak ver, HOTA ≈ 100
+
+**Bitti ölçütü:** Ölçüm hattı doğrulandı.
+
+### Gün 8: Baseline
+- [ ] `scripts/evaluate_mot.py`, `configs/eval.yaml`
+- [ ] **E1:** COCO yolo11n + ByteTrack, tuning sekanslarında; `conf` ve `imgsz` seçimi
+
+**Bitti ölçütü:** Sekans bazlı baseline tablosu.
+
+### Gün 9: Kalite ve ön işleme modülleri
+- [ ] `quality/metrics.py`, `quality/report.py`
+- [ ] `preprocessing/` (base, gamma, clahe, gerekirse denoise, factory)
+- [ ] Birim testleri (geometri değişmezi dahil)
+
+**Bitti ölçütü:** Ön işleyiciler geometriyi değiştirmiyor, testler yeşil.
+
+### Gün 10: Sentetik bozulmalar ve ablation
+- [ ] `evaluation/degradations.py`, `ablation.py`, `scripts/run_ablation.py`
+- [ ] **E2:** none / gamma / CLAHE / (denoise) gerçek videolarda
+- [ ] **E2b:** aynı deney sentetik bozulmalar altında
+
+**Bitti ölçütü:** Gerçek ve sentetik sonuçlar ayrı tablolarda.
+
+---
+
+## Hafta 3: Fine-tune ve analitik
+
+### Gün 11: YOLO veri seti
+- [ ] `datasets/to_yolo.py`, `tests/unit/test_to_yolo.py`
+- [ ] `dataset.yaml` üretildi, hold-out sızıntısı yok
+
+### Gün 12-13: Fine-tune
+- [ ] `training/finetune.py`, `configs/finetune.yaml`
+- [ ] Nano model fine-tune (imgsz pilotu)
+- [ ] `best.pt` ve eğitim metrikleri kaydedildi
+
+### Gün 14: Fine-tuned vs baseline
+- [ ] **E3:** tuning iç doğrulamasında karşılaştırma
+
+**Bitti ölçütü:** Önce/sonra tablosu.
+
+### Gün 15: Analitik
+- [ ] `analytics/geometry.py`, `line_counter.py`, `trajectories.py`
+- [ ] `viz/draw.py` içinde sayaç ve iz çizimi
+- [ ] Birim testleri
+
+**Bitti ölçütü:** Demo videosunda sayaç ve rotalar görünüyor.
+
+---
+
+## Hafta 4: Teslim
+
+### Gün 16: Tracker parametreleri
+- [ ] **E4:** `track_buffer`, `match_thresh`, eşikler (küçük tarama, tuning'de)
+
+### Gün 17: Final değerlendirme
+- [ ] Hold-out üzerinde final değerlendirme (bir kez)
+- [ ] **E5:** elle sayım vs sistem sayımı
+- [ ] **E6:** hız ve aşama bazlı gecikme
+- [ ] Hata analizi (`reports/error_analysis.md`)
+
+### Gün 18: Test ve CI
+- [ ] Eksik testler tamamlandı
+- [ ] CI yeşil
+
+### Gün 19: Dokümantasyon
+- [ ] README (mimari diyagram, demo GIF, sonuç tablosu, kurulum)
+- [ ] `MODEL_CARD.md`, `DATA_LICENSES.md`
+
+### Gün 20: Teslim
+- [ ] 60-90 sn demo videosu
+- [ ] `v1.0` etiketi
+- [ ] Canlı demo kararı
+
+---
+
+## Proje bitti sayılma ölçütü
+- [ ] `docker compose up` ile servis çalışıyor; yüklenen videodan ID'li MP4 + JSON + sayım çıkıyor
+- [ ] Hold-out sonuçları: baseline, fine-tuned ve ön işleme varyantları sekans bazında tabloda
+- [ ] Testler ve CI yeşil
+- [ ] README, MODEL_CARD, DATA_LICENSES, LICENSE mevcut
+- [ ] Demo videosu hazır

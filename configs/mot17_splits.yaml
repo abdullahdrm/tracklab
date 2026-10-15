@@ -1,0 +1,15 @@
+dataset: MOT17
+variant: FRCNN
+
+# Select hyperparameters only on tuning sequences.
+# Keep holdout sequences untouched until final evaluation.
+splits:
+  tuning:
+    - "04"
+    - "05"
+    - "09"
+    - "11"
+  holdout:
+    - "02"
+    - "10"
+    - "13"

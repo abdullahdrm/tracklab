@@ -63,3 +63,22 @@
 - `v0.1.1` sürüm etiketi doğrulandı ve çalışma ağacı temiz.
 
 **CI notu:** GitHub Actions, GitHub üzerindeki `master` commit'inde çalıştı; lint, format ve test adımlarının tamamı başarılı.
+
+## 2026-10-16: Gün 6 — MOT17 veri katmanı
+
+- MOT17 eğitim arşivi indirildi ve çıkarıldı; 21 sekans klasörü bulundu.
+- Deneylerde kullanılacak FRCNN varyantındaki yedi sekansın görüntüleri,
+  metadata dosyaları ve ground-truth dosyaları doğrulandı.
+- MOT17 lisans ve atıf notları `DATA_LICENSES.md` dosyasına eklendi.
+- `src/tracklab/datasets/mot17.py`: sequence metadata doğrulama,
+  sekans keşfi ve ham dokuz sütunlu etiket okuyucusu eklendi.
+- `src/tracklab/datasets/splits.py` ve `configs/mot17_splits.yaml`:
+  tuning (04, 05, 09, 11) ve hold-out (02, 10, 13) ayrımı tanımlandı.
+- `scripts/prepare_mot17.py` ile doğrulanmış JSON manifesti üretildi:
+  tuning 4 sekans / 3.312 kare; hold-out 3 sekans / 2.004 kare.
+- Ham etiket satırı sayıları kaydedildi; henüz geçerli yaya sayısı veya
+  takip performansı olarak yorumlanmıyor.
+- Dokuz yeni birim testi eklendi; toplam 61 test başarılı.
+- Ruff lint ve format kontrolleri temiz.
+- Sonraki aşama: TrackEval entegrasyonu ve GT'nin kendisiyle
+  değerlendirme yaparak ölçüm hattını doğrulama (E0).

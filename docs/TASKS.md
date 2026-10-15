@@ -72,10 +72,10 @@ Kurallar:
 ## Hafta 2: Ölçüm ve ön işleme
 
 ### Gün 6: MOT17 verisi
-- [ ] MOT17 indirildi (`data/raw/MOT17`), lisans notu `DATA_LICENSES.md`'ye eklendi
-- [ ] `datasets/mot17.py`, `datasets/splits.py`
-- [ ] `scripts/prepare_mot17.py`
-- [ ] `tests/unit/test_splits.py`, `test_mot17_reader.py`
+- [x] MOT17 indirildi (`data/raw/MOT17`), lisans notu `DATA_LICENSES.md`'ye eklendi
+- [x] `src/tracklab/datasets/mot17.py`, `src/tracklab/datasets/splits.py`
+- [x] `scripts/prepare_mot17.py`
+- [x] `tests/unit/test_splits.py`, `tests/unit/test_mot17_reader.py`
 
 **Bitti ölçütü:** Split manifesti hazır (tuning: 04, 05, 09, 11 / hold-out: 02, 10, 13).
 

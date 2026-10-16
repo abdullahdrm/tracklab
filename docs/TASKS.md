@@ -89,12 +89,12 @@ Kurallar:
 ### Gün 8: Baseline
 - [x] `scripts/evaluate_mot.py`, `configs/eval.yaml`
 - [x] `evaluation/mot17_detector_comparison.py` ve birim testleri
-- [x] **E1 ilk ölçümü:** COCO YOLO11n + ByteTrack ve MOT17'nin hazır FRCNN tespitleri + ByteTrack; tuning sekansları 04, 05, 09 ve 11
-- [x] TrackEval raporuna HOTA, DetA, AssA, LocA, MOTA, IDSW, IDF1, IDP ve IDR eklendi
-- [x] Sekans bazlı ve birleşik ilk baseline sonuçları dokümante edildi
-- [ ] `conf` ve `imgsz` için küçük tuning taraması yap; sonuçlara göre baseline ayarlarını sabitle
+- [x] **E1:** COCO YOLO11n + ByteTrack ve MOT17 hazır FRCNN tespitleri + ByteTrack; tuning sekansları 04, 05, 09 ve 11
+- [x] TrackEval raporu: HOTA, DetA, AssA, LocA, MOTA, IDSW, IDF1, IDP ve IDR
+- [x] `conf` ve `imgsz` için 12 konfigürasyonluk tuning taraması
+- [x] Dengeli başlangıç yapılandırması seçildi: `conf=0.10`, `imgsz=960`
 
-**Bitti ölçütü:** Sekans bazlı tablo hazır ve `conf`/`imgsz` seçimi ölçümle gerekçelendirilmiş. İlk tablo tamamlandı; parametre seçimi henüz bitmedi.
+**Bitti ölçütü:** Sekans bazlı baseline tablosu hazır; `conf`/`imgsz` seçimi ölçümle gerekçelendirildi. En yüksek HOTA veren `0.15/1280` ayarı MOT17-05'te belirgin gerileme ve daha fazla ID switch oluşturduğu için genel baseline olarak seçilmedi.
 
 ### Gün 9: Kalite ve ön işleme modülleri
 - [ ] `quality/metrics.py`, `quality/report.py`

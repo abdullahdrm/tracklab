@@ -230,7 +230,28 @@ The FRCNN rows use the precomputed detection files supplied with the correspondi
 
 The combined rows are TrackEval's joint evaluation over all four tuning sequences, not the arithmetic mean of the four individual rows. Results vary by sequence; for example, YOLO has a higher MOTA on MOT17-09 in this initial run.
 
-These are **initial, untuned measurements**. Confidence and input-resolution selection are still pending, as are preprocessing experiments and ablations.
+### Confidence and input-resolution sweep
+
+A 12-configuration sweep was run on tuning sequences 04, 05, 09, and 11. The selected general-purpose baseline remains `conf=0.10`, `imgsz=960`: it provides the highest MOTA among these settings, fewer ID switches than the high-resolution candidates, and lower runtime than `imgsz=1280`.
+
+| Confidence | imgsz | HOTA | MOTA | IDF1 | IDSW | Total sequence time |
+|---:|---:|---:|---:|---:|---:|---:|
+| 0.10 | 640 | 0.3951 | 0.3767 | 0.4598 | 300 | 51.7 s |
+| 0.15 | 640 | 0.3922 | 0.3705 | 0.4534 | 301 | 58.3 s |
+| 0.20 | 640 | 0.3878 | 0.3642 | 0.4457 | 319 | 52.6 s |
+| 0.10 | 736 | 0.4267 | 0.4214 | 0.5103 | 307 | 53.2 s |
+| 0.15 | 736 | 0.4144 | 0.4127 | 0.4880 | 309 | 62.4 s |
+| 0.20 | 736 | 0.4116 | 0.4059 | 0.4898 | 321 | 65.8 s |
+| 0.10 | 960 | 0.4351 | **0.4725** | 0.5111 | 371 | 72.7 s |
+| 0.15 | 960 | 0.4352 | 0.4687 | 0.5117 | 362 | 76.9 s |
+| 0.20 | 960 | 0.4336 | 0.4649 | 0.5083 | 364 | 74.3 s |
+| 0.10 | 1280 | 0.4554 | 0.4627 | 0.5253 | 445 | 79.9 s |
+| 0.15 | 1280 | **0.4566** | 0.4662 | **0.5257** | 463 | 79.7 s |
+| 0.20 | 1280 | 0.4544 | 0.4697 | 0.5249 | 470 | 80.7 s |
+
+The `0.15 / 1280` setting reaches the highest combined HOTA and IDF1 but adds 92 ID switches versus the selected baseline. It also regresses substantially on MOT17-05: HOTA falls from `0.4034` to `0.3621`, MOTA from `0.4292` to `0.2514`, and IDF1 from `0.5439` to `0.4452`. The combined metrics therefore do not justify selecting it as the general-purpose baseline. The `0.15 / 960` HOTA gain over the current baseline is negligible (`0.00008`) and comes with lower MOTA and longer runtime.
+
+The figures are joint TrackEval results for the four tuning sequences, not arithmetic means of per-sequence metrics. The old incomplete `imgsz=720` run was excluded; the intended size was changed to `736` after Ultralytics reported stride-32 rounding. Hold-out sequences 02, 10, and 13 were not evaluated.
 
 To rerun the tuning evaluation from the repository root, prepare the MOT17 dataset and make sure `models/yolo11n.pt` is available, then run:
 
@@ -256,20 +277,20 @@ TrackLab is a local portfolio and demonstration application, not a hardened publ
 - Jobs run through FastAPI background tasks rather than a durable worker queue.
 - Interrupted jobs are not automatically resumed after a process or container restart.
 - Authentication, user quotas, and production-grade observability are not implemented.
-- Initial MOT17 tuning-sequence baseline results are available; confidence/input-resolution tuning and preprocessing ablations remain pending. Hold-out sequences (02, 10, 13) are reserved for Day 17.
+- Initial MOT17 baseline and confidence/input-resolution selection are documented; preprocessing ablations remain pending. Hold-out sequences (02, 10, 13) are reserved for Day 17.
 - Preprocessing, line counting, and trajectory analytics are planned extensions, not active features in v0.1.1.
 
 ## Roadmap
 
-The evaluation infrastructure and first MOT17 tuning baseline are in place. The initial metrics are documented above; baseline parameter selection and preprocessing experiments remain open.
+The MOT17 evaluation infrastructure, initial baseline, and confidence/input-resolution selection are complete. Preprocessing experiments and downstream application analytics remain open.
 
 1. **[x] Dataset preparation:** MOT17 reader and deterministic tuning/hold-out split manifests.
 2. **[x] Evaluation integration:** TrackEval bridge and perfect-prediction sanity test.
-3. **[ ] Baseline stabilization:** Run a small `conf`/`imgsz` scan on tuning sequences and select the baseline configuration.
+3. **[x] Baseline stabilization:** Measured `conf`/`imgsz` settings on tuning sequences and selected `conf=0.10`, `imgsz=960` as the balanced starting configuration.
 4. **[ ] Preprocessing experiments:** Implement and compare gamma correction, CLAHE, and selected denoising options.
 5. **[ ] Controlled ablations:** Measure preprocessing and synthetic image degradations against the established baseline.
 
-Only tuning sequences 04, 05, 09, and 11 have been used for the initial measurements. Hold-out sequences 02, 10, and 13 remain reserved for the final evaluation on Day 17.
+Only tuning sequences 04, 05, 09, and 11 have been used for the baseline and parameter sweep. Hold-out sequences 02, 10, and 13 remain reserved for the final evaluation on Day 17.
 
 ## License
 

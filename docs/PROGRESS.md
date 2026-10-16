@@ -135,3 +135,56 @@ Bunlar ilk baseline ölçümleridir. `conf` ve `imgsz` için tarama henüz yapı
 
 - Doğrulama: 68 test geçti; Ruff lint ve format kontrolleri başarılı, `git diff --check` temiz.
 - Tek test uyarısı FastAPI/Starlette test istemcisindeki `httpx` deprecation uyarısıdır; test başarısını etkilemiyor.
+## 2026-10-16: Gün 8 — conf/imgsz tuning ve baseline seçimi
+
+- Tuning sekanslarında (`MOT17-04/05/09/11-FRCNN`) 3 confidence değeri
+  (`0.10`, `0.15`, `0.20`) ve 4 görüntü boyutu (`640`, `736`, `960`, `1280`)
+  değerlendirildi: toplam 12 geçerli yapılandırma.
+- `imgsz=720` ilk denemede Ultralytics tarafından stride 32 nedeniyle 736'ya
+  yuvarlandı. Karşılaştırılabilir sweep için 736 doğrudan kullanıldı; eksik
+  kalan eski 720 raporu sonuç tablosuna alınmadı.
+- Hold-out sekansları `MOT17-02/10/13-FRCNN` değerlendirilmedi.
+
+### Birleşik tuning sweep sonuçları
+
+| conf | imgsz | HOTA | DetA | AssA | MOTA | IDF1 | IDSW | IDP | IDR | Süre (sn) |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0.10 | 640 | 0.3951 | 0.3489 | 0.4511 | 0.3767 | 0.4598 | 300 | 0.6967 | 0.3431 | 51.7 |
+| 0.15 | 640 | 0.3922 | 0.3425 | 0.4528 | 0.3705 | 0.4534 | 301 | 0.6999 | 0.3353 | 58.3 |
+| 0.20 | 640 | 0.3878 | 0.3365 | 0.4506 | 0.3642 | 0.4457 | 319 | 0.7013 | 0.3266 | 52.6 |
+| 0.10 | 736 | 0.4267 | 0.3847 | 0.4778 | 0.4214 | 0.5103 | 307 | 0.7273 | 0.3930 | 53.2 |
+| 0.15 | 736 | 0.4144 | 0.3766 | 0.4606 | 0.4127 | 0.4880 | 309 | 0.7114 | 0.3714 | 62.4 |
+| 0.20 | 736 | 0.4116 | 0.3707 | 0.4617 | 0.4059 | 0.4898 | 321 | 0.7254 | 0.3697 | 65.8 |
+| 0.10 | 960 | 0.4351 | 0.4353 | 0.4408 | 0.4725 | 0.5111 | 371 | 0.6563 | 0.4185 | 72.7 |
+| 0.15 | 960 | 0.4352 | 0.4301 | 0.4458 | 0.4687 | 0.5117 | 362 | 0.6703 | 0.4138 | 76.9 |
+| 0.20 | 960 | 0.4336 | 0.4251 | 0.4472 | 0.4649 | 0.5083 | 364 | 0.6766 | 0.4071 | 74.3 |
+| 0.10 | 1280 | 0.4554 | 0.4717 | 0.4470 | 0.4627 | 0.5253 | 445 | 0.5995 | 0.4675 | 79.9 |
+| 0.15 | 1280 | 0.4566 | 0.4686 | 0.4517 | 0.4662 | 0.5257 | 463 | 0.6094 | 0.4623 | 79.7 |
+| 0.20 | 1280 | 0.4544 | 0.4662 | 0.4496 | 0.4697 | 0.5249 | 470 | 0.6172 | 0.4566 | 80.7 |
+
+Birleşik metrikler TrackEval'in dört tuning sekansını birlikte değerlendirmesidir;
+sekans bazlı sonuçların aritmetik ortalaması değildir. Süre, dört sekansın
+raporlanan inference/tracking süreleri toplamıdır ve donanım/çalışma koşullarına
+bağlı olarak değişebilir.
+
+### Başlangıç yapılandırması kararı
+
+`configs/eval.yaml` içindeki `conf=0.10`, `imgsz=960` başlangıç ayarı korundu.
+Bu ayarda birleşik HOTA `0.4351`, MOTA `0.4725`, IDF1 `0.5111`, IDSW `371`
+ve raporlanan toplam sekans süresi `72.7 s` oldu.
+
+`conf=0.15`, `imgsz=1280` en yüksek HOTA (`0.4566`) ve IDF1 (`0.5257`) verdi;
+ancak IDSW `463`'e yükseldi ve MOT17-05 sekansında HOTA `0.3621`, MOTA `0.2514`
+ve IDF1 `0.4452`'ye geriledi. Aynı sekansın başlangıç baseline değerleri sırasıyla
+HOTA `0.4034`, MOTA `0.4292` ve IDF1 `0.5439` idi. Bu nedenle sadece birleşik
+HOTA'yı maksimize etmek yerine sekanslar arası denge, MOTA, IDSW ve çalışma süresi
+birlikte değerlendirildi; `0.10/960` genel başlangıç yapılandırması olarak tutuldu.
+
+`conf=0.15`, `imgsz=960` birleşik HOTA'yı yalnızca `0.00008` artırdı ve IDSW'yi
+371'den 362'ye düşürdü; buna karşılık MOTA `0.4725`'ten `0.4687`'ye geriledi ve
+süre yaklaşık 4.2 saniye arttı. Bu küçük fark mevcut yapılandırmayı değiştirmek
+için yeterli görülmedi.
+
+Sweep raporları `outputs/mot17/param_sweep/` altındadır. `outputs/` Git dışında
+tutulduğu için tabloda önemli sonuçlar ayrıca kaydedildi. Gün 8 tamamlandı;
+sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.

@@ -80,9 +80,9 @@ Kurallar:
 **Bitti ölçütü:** Split manifesti hazır (tuning: 04, 05, 09, 11 / hold-out: 02, 10, 13).
 
 ### Gün 7: TrackEval
-- [ ] `third_party/TrackEval` kuruldu
-- [ ] `evaluation/trackeval_bridge.py`
-- [ ] **E0:** GT'yi tahmin olarak ver, HOTA ≈ 100
+- [x] `third_party/TrackEval` kuruldu
+- [x] `evaluation/trackeval_bridge.py`
+- [x] **E0:** GT'yi tahmin olarak ver, HOTA ≈ 100
 
 **Bitti ölçütü:** Ölçüm hattı doğrulandı.
 

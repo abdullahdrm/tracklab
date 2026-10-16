@@ -82,3 +82,23 @@
 - Ruff lint ve format kontrolleri temiz.
 - Sonraki aşama: TrackEval entegrasyonu ve GT'nin kendisiyle
   değerlendirme yaparak ölçüm hattını doğrulama (E0).
+
+
+## 2026-10-16: Gün 7 — TrackEval ve E0 doğrulaması
+
+- TrackEval, MIT lisanslı ayrı bir Git submodule olarak eklendi ve commit
+  `12c8791b303e0a0b50f753af204249e622d0281a` sürümüne sabitlendi.
+- NumPy 2 uyumluluğu, yalnızca TrackEval yüklenirken uygulanan süreç içi
+  alias'larla sağlandı; submodule kaynak kodu değiştirilmedi.
+- `evaluation/trackeval_bridge.py`, MOT17'nin dokuz sütunlu ham GT biçiminden
+  TrackEval'in on sütunlu tahmin biçimine dönüşüm için eklendi.
+- Sentetik iki karelik GT self-evaluation testi geçti.
+- Gerçek MOT17 FRCNN tuning sekansları 04, 05, 09 ve 11 üzerinde E0 başarılı:
+  HOTA=1.0, DetA=1.0, AssA=1.0, LocA=1.0.
+- E0 raporu `outputs/mot17/e0/report.json` konumuna yazıldı.
+- Test keşfi `testpaths = ["tests"]` olacak şekilde sınırlandı; böylece
+  TrackEval'in bağımsız veri kümelerini bekleyen kendi testleri, TrackLab
+  test paketiyle karıştırılmıyor.
+- Son doğrulama: 63 test başarılı. Mevcut FastAPI/Starlette/httpx deprecation
+  uyarısı sürüyor; test başarısını etkilemiyor.
+- Not: E0 bir ölçüm hattı sanity check'idir; YOLO baseline performansı değildir.

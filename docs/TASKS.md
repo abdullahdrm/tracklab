@@ -87,10 +87,14 @@ Kurallar:
 **Bitti ölçütü:** Ölçüm hattı doğrulandı.
 
 ### Gün 8: Baseline
-- [ ] `scripts/evaluate_mot.py`, `configs/eval.yaml`
-- [ ] **E1:** COCO yolo11n + ByteTrack, tuning sekanslarında; `conf` ve `imgsz` seçimi
+- [x] `scripts/evaluate_mot.py`, `configs/eval.yaml`
+- [x] `evaluation/mot17_detector_comparison.py` ve birim testleri
+- [x] **E1 ilk ölçümü:** COCO YOLO11n + ByteTrack ve MOT17'nin hazır FRCNN tespitleri + ByteTrack; tuning sekansları 04, 05, 09 ve 11
+- [x] TrackEval raporuna HOTA, DetA, AssA, LocA, MOTA, IDSW, IDF1, IDP ve IDR eklendi
+- [x] Sekans bazlı ve birleşik ilk baseline sonuçları dokümante edildi
+- [ ] `conf` ve `imgsz` için küçük tuning taraması yap; sonuçlara göre baseline ayarlarını sabitle
 
-**Bitti ölçütü:** Sekans bazlı baseline tablosu.
+**Bitti ölçütü:** Sekans bazlı tablo hazır ve `conf`/`imgsz` seçimi ölçümle gerekçelendirilmiş. İlk tablo tamamlandı; parametre seçimi henüz bitmedi.
 
 ### Gün 9: Kalite ve ön işleme modülleri
 - [ ] `quality/metrics.py`, `quality/report.py`

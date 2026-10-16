@@ -102,3 +102,36 @@
 - Son doğrulama: 63 test başarılı. Mevcut FastAPI/Starlette/httpx deprecation
   uyarısı sürüyor; test başarısını etkilemiyor.
 - Not: E0 bir ölçüm hattı sanity check'idir; YOLO baseline performansı değildir.
+
+## 2026-10-16: Gün 8 — İlk MOT17 baseline ölçümü
+
+- `configs/eval.yaml` ve `scripts/evaluate_mot.py` ile MOT17 değerlendirme akışı eklendi.
+- `evaluation/mot17_detector_comparison.py`, ByteTrack yaklaşımını iki tespit kaynağıyla değerlendirir: MOT17'nin hazır FRCNN `det.txt` tespitleri ve COCO ön eğitimli YOLO11n.
+- İlk YOLO ölçüm ayarları: `imgsz=960`, `confidence=0.10`, `IoU=0.7`, `device=auto`, model `models/yolo11n.pt`; değerlendirme yaya sınıfına odaklanır.
+- Yalnızca MOT17-04, MOT17-05, MOT17-09 ve MOT17-11 tuning sekansları kullanıldı. Hold-out sekansları 02, 10 ve 13 değerlendirilmedi.
+- TrackEval köprüsüne HOTA ailesinin yanında CLEAR ve Identity metrikleri eklendi: MOTA, IDSW, IDF1, IDP ve IDR.
+- Makine tarafından üretilen özet `outputs/mot17/comparison/selected_sequences_summary.json` konumundadır. `outputs/` sürüm kontrolü dışında tutulduğu için sonuçlar bu belgeye de kaydedildi.
+
+### İlk tuning sonuçları
+
+| Sekans | Tespit kaynağı + takip | HOTA | DetA | AssA | LocA | MOTA | IDSW | IDF1 | IDP | IDR |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 04 | MOT17 FRCNN tespitleri + ByteTrack | 0.5306 | 0.4838 | 0.5832 | 0.9036 | 0.5424 | 43 | 0.6223 | 0.8821 | 0.4807 |
+| 04 | YOLO11n + ByteTrack | 0.4277 | 0.4143 | 0.4472 | 0.8313 | 0.4576 | 142 | 0.4998 | 0.6881 | 0.3924 |
+| 05 | MOT17 FRCNN tespitleri + ByteTrack | 0.4293 | 0.4043 | 0.4567 | 0.8429 | 0.4840 | 57 | 0.5455 | 0.8052 | 0.4125 |
+| 05 | YOLO11n + ByteTrack | 0.4034 | 0.4182 | 0.3929 | 0.7703 | 0.4292 | 130 | 0.5439 | 0.6281 | 0.4795 |
+| 09 | MOT17 FRCNN tespitleri + ByteTrack | 0.4811 | 0.4870 | 0.4755 | 0.8993 | 0.5454 | 17 | 0.5850 | 0.8171 | 0.4556 |
+| 09 | YOLO11n + ByteTrack | 0.4325 | 0.5138 | 0.3670 | 0.8181 | 0.5775 | 60 | 0.5078 | 0.5538 | 0.4689 |
+| 11 | MOT17 FRCNN tespitleri + ByteTrack | 0.5422 | 0.5256 | 0.5601 | 0.9058 | 0.5719 | 44 | 0.6105 | 0.8077 | 0.4907 |
+| 11 | YOLO11n + ByteTrack | 0.4874 | 0.5067 | 0.4730 | 0.8370 | 0.5197 | 39 | 0.5395 | 0.6213 | 0.4768 |
+| Tuning birleşik (04/05/09/11) | MOT17 FRCNN tespitleri + ByteTrack | 0.5195 | 0.4813 | 0.5621 | 0.8982 | 0.5408 | 161 | 0.6103 | 0.8587 | 0.4733 |
+| Tuning birleşik (04/05/09/11) | YOLO11n + ByteTrack | 0.4351 | 0.4353 | 0.4408 | 0.8246 | 0.4725 | 371 | 0.5111 | 0.6563 | 0.4185 |
+
+Birleşik satırlar, dört sekansın aritmetik ortalaması değil, TrackEval'in sekansları birlikte değerlendirmesinin sonucudur. Metrikler sekanslara göre farklılaşabilir; örneğin MOT17-09 üzerinde YOLO'nun MOTA değeri FRCNN tespitleriyle elde edilenden yüksektir.
+
+**Yorumlama sınırı:** FRCNN satırları MOT17'nin hazır tespit dosyalarını kullanır; bu deneyde bağımsız bir Faster R-CNN modeli çalıştırılmadı. Bu sonuçlar, tespit kaynağının ByteTrack hattındaki etkisine yönelik bir başlangıç referansıdır; kontrollü bir model-model karşılaştırması olarak yorumlanmamalıdır.
+
+Bunlar ilk baseline ölçümleridir. `conf` ve `imgsz` için tarama henüz yapılmadığından Gün 8 tamamlanmış sayılmıyor. Sonraki adım, yalnızca tuning sekanslarında bu parametreleri ölçerek başlangıç ayarlarını sabitlemektir.
+
+- Doğrulama: 68 test geçti; Ruff lint ve format kontrolleri başarılı, `git diff --check` temiz.
+- Tek test uyarısı FastAPI/Starlette test istemcisindeki `httpx` deprecation uyarısıdır; test başarısını etkilemiyor.

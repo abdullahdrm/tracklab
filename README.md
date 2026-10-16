@@ -207,14 +207,44 @@ The main configuration file is `configs/pipeline.yaml`. It references component 
 
 **Implementation status:** In v0.1.1, detector, tracker, and output settings are consumed by the processing pipeline. The preprocessing and analytics configurations are scaffolding only; gamma correction, CLAHE, denoising, line counting, and trajectory analytics are not yet connected to the runtime processing loop.
 
-## Tests and code quality
+## MOT17 evaluation: initial tuning baseline
 
+The first quantitative baseline uses only MOT17 tuning sequences 04, 05, 09, and 11. Hold-out sequences 02, 10, and 13 are reserved for the final evaluation on Day 17.
+
+The initial YOLO configuration in `configs/eval.yaml` uses YOLO11n with `imgsz=960`, confidence `0.10`, IoU `0.7`, and automatic device selection. The evaluation focuses on the person class and uses ByteTrack.
+
+The FRCNN rows use the precomputed detection files supplied with the corresponding MOT17 FRCNN sequences. They do **not** represent a Faster R-CNN model run by TrackLab. Treat these rows as a reference for comparing detection sources with ByteTrack, not as a strictly controlled model-versus-model experiment.
+
+| Sequence | Detection source + tracker | HOTA | DetA | AssA | LocA | MOTA | IDSW | IDF1 | IDP | IDR |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| MOT17-04 | MOT17 FRCNN detections + ByteTrack | 0.5306 | 0.4838 | 0.5832 | 0.9036 | 0.5424 | 43 | 0.6223 | 0.8821 | 0.4807 |
+| MOT17-04 | YOLO11n + ByteTrack | 0.4277 | 0.4143 | 0.4472 | 0.8313 | 0.4576 | 142 | 0.4998 | 0.6881 | 0.3924 |
+| MOT17-05 | MOT17 FRCNN detections + ByteTrack | 0.4293 | 0.4043 | 0.4567 | 0.8429 | 0.4840 | 57 | 0.5455 | 0.8052 | 0.4125 |
+| MOT17-05 | YOLO11n + ByteTrack | 0.4034 | 0.4182 | 0.3929 | 0.7703 | 0.4292 | 130 | 0.5439 | 0.6281 | 0.4795 |
+| MOT17-09 | MOT17 FRCNN detections + ByteTrack | 0.4811 | 0.4870 | 0.4755 | 0.8993 | 0.5454 | 17 | 0.5850 | 0.8171 | 0.4556 |
+| MOT17-09 | YOLO11n + ByteTrack | 0.4325 | 0.5138 | 0.3670 | 0.8181 | 0.5775 | 60 | 0.5078 | 0.5538 | 0.4689 |
+| MOT17-11 | MOT17 FRCNN detections + ByteTrack | 0.5422 | 0.5256 | 0.5601 | 0.9058 | 0.5719 | 44 | 0.6105 | 0.8077 | 0.4907 |
+| MOT17-11 | YOLO11n + ByteTrack | 0.4874 | 0.5067 | 0.4730 | 0.8370 | 0.5197 | 39 | 0.5395 | 0.6213 | 0.4768 |
+| Tuning combined | MOT17 FRCNN detections + ByteTrack | 0.5195 | 0.4813 | 0.5621 | 0.8982 | 0.5408 | 161 | 0.6103 | 0.8587 | 0.4733 |
+| Tuning combined | YOLO11n + ByteTrack | 0.4351 | 0.4353 | 0.4408 | 0.8246 | 0.4725 | 371 | 0.5111 | 0.6563 | 0.4185 |
+
+The combined rows are TrackEval's joint evaluation over all four tuning sequences, not the arithmetic mean of the four individual rows. Results vary by sequence; for example, YOLO has a higher MOTA on MOT17-09 in this initial run.
+
+These are **initial, untuned measurements**. Confidence and input-resolution selection are still pending, as are preprocessing experiments and ablations.
+
+To rerun the tuning evaluation from the repository root, prepare the MOT17 dataset and make sure `models/yolo11n.pt` is available, then run:
+
+```bash
+python scripts/evaluate_mot.py --split tuning --detectors both
+```
+
+## Tests and code quality
 Install the development dependencies, then run:
 
 ```bash
 python -m pytest -q
-ruff check src/tracklab scripts tests
-ruff format --check src/tracklab scripts tests
+ruff check src/tracklab scripts evaluation tests
+ruff format --check src/tracklab scripts evaluation tests
 ```
 
 The project includes unit and API integration tests. GitHub Actions runs lint, formatting, and test checks on pushes and pull requests targeting `master`.
@@ -226,20 +256,20 @@ TrackLab is a local portfolio and demonstration application, not a hardened publ
 - Jobs run through FastAPI background tasks rather than a durable worker queue.
 - Interrupted jobs are not automatically resumed after a process or container restart.
 - Authentication, user quotas, and production-grade observability are not implemented.
-- Quantitative MOT benchmark evaluation and preprocessing ablations are not yet completed.
+- Initial MOT17 tuning-sequence baseline results are available; confidence/input-resolution tuning and preprocessing ablations remain pending. Hold-out sequences (02, 10, 13) are reserved for Day 17.
 - Preprocessing, line counting, and trajectory analytics are planned extensions, not active features in v0.1.1.
 
 ## Roadmap
 
-The next development stage focuses on establishing a reproducible evaluation workflow before attempting model or preprocessing improvements.
+The evaluation infrastructure and first MOT17 tuning baseline are in place. The initial metrics are documented above; baseline parameter selection and preprocessing experiments remain open.
 
-1. **Dataset preparation:** Add a MOT17 reader and deterministic tuning/hold-out split manifests.
-2. **Evaluation integration:** Integrate TrackEval and verify the evaluation bridge with a perfect-prediction sanity test.
-3. **Baseline measurement:** Evaluate YOLO + ByteTrack on designated tuning sequences.
-4. **Preprocessing experiments:** Implement and compare gamma correction, CLAHE, and selected denoising options.
-5. **Controlled ablations:** Measure the effect of preprocessing and synthetic image degradations against the established baseline.
+1. **[x] Dataset preparation:** MOT17 reader and deterministic tuning/hold-out split manifests.
+2. **[x] Evaluation integration:** TrackEval bridge and perfect-prediction sanity test.
+3. **[ ] Baseline stabilization:** Run a small `conf`/`imgsz` scan on tuning sequences and select the baseline configuration.
+4. **[ ] Preprocessing experiments:** Implement and compare gamma correction, CLAHE, and selected denoising options.
+5. **[ ] Controlled ablations:** Measure preprocessing and synthetic image degradations against the established baseline.
 
-These are planned milestones, not completed results. Benchmark metrics and performance claims will be added after the corresponding experiments have been run and verified.
+Only tuning sequences 04, 05, 09, and 11 have been used for the initial measurements. Hold-out sequences 02, 10, and 13 remain reserved for the final evaluation on Day 17.
 
 ## License
 

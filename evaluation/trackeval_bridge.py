@@ -214,7 +214,11 @@ def evaluate_mot_challenge(
     evaluator = trackeval.Evaluator(evaluator_config)
     results, messages = evaluator.evaluate(
         [dataset],
-        [trackeval.metrics.HOTA()],
+        [
+            trackeval.metrics.HOTA(),
+            trackeval.metrics.CLEAR(),
+            trackeval.metrics.Identity(),
+        ],
     )
 
     dataset_name = dataset.get_name()
@@ -227,8 +231,22 @@ def evaluate_mot_challenge(
     if tracker_results is None:
         raise RuntimeError("TrackEval returned no results.")
 
-    combined = tracker_results["COMBINED_SEQ"]["pedestrian"]["HOTA"]
-    return {
-        name: float(np.mean(combined[name]))
+    combined = tracker_results["COMBINED_SEQ"]["pedestrian"]
+    hota = combined["HOTA"]
+    clear = combined["CLEAR"]
+    identity = combined["Identity"]
+
+    metrics = {
+        name: float(np.asarray(hota[name], dtype=float).mean())
         for name in ("HOTA", "DetA", "AssA", "LocA")
     }
+    metrics.update(
+        {
+            "MOTA": float(np.asarray(clear["MOTA"], dtype=float).mean()),
+            "IDSW": float(np.asarray(clear["IDSW"], dtype=float).mean()),
+            "IDF1": float(np.asarray(identity["IDF1"], dtype=float).mean()),
+            "IDP": float(np.asarray(identity["IDP"], dtype=float).mean()),
+            "IDR": float(np.asarray(identity["IDR"], dtype=float).mean()),
+        }
+    )
+    return metrics

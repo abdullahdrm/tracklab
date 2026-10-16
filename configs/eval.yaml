@@ -1,0 +1,29 @@
+# Day 8: reproducible MOT17 baseline evaluation.
+# Hold-out sequences are reserved for the final evaluation on Day 17.
+
+data_root: data/raw/MOT17/train
+output_root: outputs/mot17/comparison
+variant: FRCNN
+default_split: tuning
+
+splits:
+  tuning:
+    - MOT17-04-FRCNN
+    - MOT17-05-FRCNN
+    - MOT17-09-FRCNN
+    - MOT17-11-FRCNN
+  holdout:
+    - MOT17-02-FRCNN
+    - MOT17-10-FRCNN
+    - MOT17-13-FRCNN
+
+detectors:
+  - frcnn
+  - yolo
+
+yolo:
+  model_path: models/yolo11n.pt
+  imgsz: 960
+  confidence: 0.1
+  iou: 0.7
+  device: auto

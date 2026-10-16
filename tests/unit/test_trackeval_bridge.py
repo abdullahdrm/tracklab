@@ -104,3 +104,6 @@ def test_trackeval_gt_self_evaluation_is_perfect(tmp_path: Path) -> None:
     assert metrics["DetA"] == pytest.approx(1.0, abs=1e-6)
     assert metrics["AssA"] == pytest.approx(1.0, abs=1e-6)
     assert metrics["LocA"] == pytest.approx(1.0, abs=1e-6)
+    assert metrics["MOTA"] == pytest.approx(1.0, abs=1e-6)
+    assert metrics["IDSW"] == pytest.approx(0.0, abs=1e-6)
+    assert metrics["IDF1"] == pytest.approx(1.0, abs=1e-6)

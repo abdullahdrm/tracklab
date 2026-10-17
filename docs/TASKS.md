@@ -97,11 +97,12 @@ Kurallar:
 **Bitti ölçütü:** Sekans bazlı baseline tablosu hazır; `conf`/`imgsz` seçimi ölçümle gerekçelendirildi. En yüksek HOTA veren `0.15/1280` ayarı MOT17-05'te belirgin gerileme ve daha fazla ID switch oluşturduğu için genel baseline olarak seçilmedi.
 
 ### Gün 9: Kalite ve ön işleme modülleri
-- [ ] `quality/metrics.py`, `quality/report.py`
-- [ ] `preprocessing/` (base, gamma, clahe, gerekirse denoise, factory)
-- [ ] Birim testleri (geometri değişmezi dahil)
+- [x] `quality/metrics.py`, `quality/report.py`; yapılandırılabilir kare örneklemesi ve özet rapor
+- [x] `preprocessing/` base, gamma, CLAHE, denoise ve factory modülleri
+- [x] Birim ve pipeline testleri; geometri/veri tipi değişmezleri ve varsayılan `mode: none` doğrulandı
+- [x] Ön işleme yalnızca tracker girişine uygulanıyor; kalite ölçümü ve görselleştirme orijinal kareyi kullanıyor
 
-**Bitti ölçütü:** Ön işleyiciler geometriyi değiştirmiyor, testler yeşil.
+**Bitti ölçütü:** Ön işleyiciler geometriyi değiştirmiyor, testler yeşil. Tam proje doğrulaması: 109 test geçti; Ruff ve biçim kontrolleri başarılı.
 
 ### Gün 10: Sentetik bozulmalar ve ablation
 - [ ] `evaluation/degradations.py`, `ablation.py`, `scripts/run_ablation.py`

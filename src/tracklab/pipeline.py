@@ -16,6 +16,9 @@ from tracklab.io.video import (
     read_frames,
     transcode_video_h264,
 )
+from tracklab.preprocessing.factory import build_preprocessor
+from tracklab.quality.metrics import compute_frame_quality
+from tracklab.quality.report import QUALITY_METRICS, summarize_quality_samples
 from tracklab.schemas import FrameResult, TrackedObject, VideoResult
 from tracklab.tracking.yolo_bytetrack import YoloByteTrack
 from tracklab.viz.draw import ClassNames, draw_tracks
@@ -73,6 +76,7 @@ class VideoPipeline:
         if tracker is None:
             tracker = YoloByteTrack(self.config)
         self.tracker = tracker
+        preprocessor = build_preprocessor(self.config.preprocessing)
 
         source = Path(input_path).expanduser().resolve()
         output_root = Path(output_dir).expanduser()
@@ -106,6 +110,7 @@ class VideoPipeline:
         unique_track_ids: set[int] = set()
         objects_by_class_id: dict[str, int] = {}
         total_detections = 0
+        quality_samples: list[dict[str, float | int]] = []
 
         model = getattr(tracker, "model", None)
         class_names: ClassNames = getattr(model, "names", None)
@@ -115,7 +120,18 @@ class VideoPipeline:
                 writer: FrameWriter | None = None
 
                 for frame_index, frame in read_frames(source):
-                    objects = tracker.track_frame(frame)
+                    if frame_index % self.config.output.quality_every_n_frames == 0:
+                        quality_samples.append(
+                            {
+                                "frame_index": frame_index,
+                                **compute_frame_quality(frame),
+                            }
+                        )
+
+                    # Quality measures describe the original input frame;
+                    # only the detector/tracker receives the transformed frame.
+                    tracking_frame = preprocessor(frame)
+                    objects = tracker.track_frame(tracking_frame)
 
                     if raw_video_path is not None and writer is None:
                         writer = stack.enter_context(
@@ -165,6 +181,24 @@ class VideoPipeline:
             "unique_tracks": len(unique_track_ids),
             "track_ids": sorted(unique_track_ids),
             "objects_by_class_id": objects_by_class_id,
+        }
+
+        quality_metric_samples = [
+            {name: float(sample[name]) for name in QUALITY_METRICS}
+            for sample in quality_samples
+        ]
+        quality_summary = summarize_quality_samples(quality_metric_samples)
+        summary["quality"] = {
+            "sampling": {
+                "every_n_frames": self.config.output.quality_every_n_frames,
+                "frame_index_base": 0,
+            },
+            "sample_count": len(quality_samples),
+            "sampled_frame_indices": [
+                int(sample["frame_index"]) for sample in quality_samples
+            ],
+            "samples": quality_samples,
+            "metrics": quality_summary["metrics"],
         }
 
         result = VideoResult(

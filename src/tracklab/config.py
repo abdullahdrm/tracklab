@@ -64,12 +64,14 @@ class ClaheConfig(StrictModel):
 
 
 class DenoiseConfig(StrictModel):
-    """Denoising settings."""
+    """Denoising settings for bilateral and colored non-local means filters."""
 
     method: Literal["bilateral", "fastNlMeans"] = "bilateral"
     d: PositiveInt = 5
     sigma_color: float = Field(default=50.0, ge=0.0)
     sigma_space: float = Field(default=50.0, ge=0.0)
+    h: float = Field(default=10.0, ge=0.0)
+    h_color: float = Field(default=10.0, ge=0.0)
 
 
 class RouterConfig(StrictModel):

@@ -18,6 +18,8 @@ TrackLab processes a video frame by frame, detects objects, maintains track iden
 - **Multi-object tracking:** ByteTrack integration with persistent track identities across consecutive frames.
 - **Video processing:** Frame reading, bounding-box visualization, and H.264 MP4 output.
 - **Structured results:** JSON output containing video metadata, summary statistics, processing configuration, and optional per-frame tracking results.
+- **Frame-quality report:** Sampled brightness, contrast, sharpness, and a robust noise proxy are included under `summary.quality`; sampling frequency is configurable.
+- **Classical preprocessing:** Optional `none`, gamma, CLAHE, denoise, and chained modes can be selected; preprocessing is disabled by default.
 - **MOT export:** Optional text output in MOTChallenge-style format.
 - **Web application:** Browser-based video upload and result retrieval through FastAPI.
 - **Job management:** Persistent job status and summary records backed by SQLAlchemy and SQLite.
@@ -202,10 +204,10 @@ The main configuration file is `configs/pipeline.yaml`. It references component 
 | `configs/detector.yaml` | YOLO model path, input resolution, confidence and IoU thresholds, classes, and device |
 | `configs/bytetrack.yaml` | ByteTrack thresholds, track buffer, and matching settings |
 | `configs/pipeline.yaml` | Component configuration references and output options |
-| `configs/preprocessing.yaml` | Configuration for planned image-preprocessing modes |
+| `configs/preprocessing.yaml` | Select `none`, gamma, CLAHE, denoise, or a configured preprocessing chain |
 | `configs/analytics.yaml` | Configuration for planned line-counting and trajectory analytics |
 
-**Implementation status:** In v0.1.1, detector, tracker, and output settings are consumed by the processing pipeline. The preprocessing and analytics configurations are scaffolding only; gamma correction, CLAHE, denoising, line counting, and trajectory analytics are not yet connected to the runtime processing loop.
+**Implementation status:** The latest tagged release is v0.1.1. In the current development tree, detector, tracker, quality sampling, output settings, and configured classical preprocessing are consumed by the processing pipeline. Preprocessing defaults to `mode: none`; when enabled, it modifies only the frame passed to the tracker. Quality metrics and output visualization use the original frame. Line counting and trajectory analytics remain planned features.
 
 ## MOT17 evaluation: initial tuning baseline
 
@@ -278,16 +280,16 @@ TrackLab is a local portfolio and demonstration application, not a hardened publ
 - Interrupted jobs are not automatically resumed after a process or container restart.
 - Authentication, user quotas, and production-grade observability are not implemented.
 - Initial MOT17 baseline and confidence/input-resolution selection are documented; preprocessing ablations remain pending. Hold-out sequences (02, 10, 13) are reserved for Day 17.
-- Preprocessing, line counting, and trajectory analytics are planned extensions, not active features in v0.1.1.
+- Classical preprocessing and sampled frame-quality reporting are implemented in the current development tree, but preprocessing defaults to `none`; the effect of gamma/CLAHE/denoise on tracking metrics has not yet been evaluated. Line counting and trajectory analytics are not implemented yet.
 
 ## Roadmap
 
-The MOT17 evaluation infrastructure, initial baseline, and confidence/input-resolution selection are complete. Preprocessing experiments and downstream application analytics remain open.
+The MOT17 evaluation infrastructure, initial baseline, confidence/input-resolution selection, quality reporting, and preprocessing implementation are complete. Quantitative preprocessing ablations and downstream application analytics remain open.
 
 1. **[x] Dataset preparation:** MOT17 reader and deterministic tuning/hold-out split manifests.
 2. **[x] Evaluation integration:** TrackEval bridge and perfect-prediction sanity test.
 3. **[x] Baseline stabilization:** Measured `conf`/`imgsz` settings on tuning sequences and selected `conf=0.10`, `imgsz=960` as the balanced starting configuration.
-4. **[ ] Preprocessing experiments:** Implement and compare gamma correction, CLAHE, and selected denoising options.
+4. **[x] Preprocessing implementation:** Implement gamma correction, CLAHE, denoising, a factory, and pipeline integration with `none` as the default.
 5. **[ ] Controlled ablations:** Measure preprocessing and synthetic image degradations against the established baseline.
 
 Only tuning sequences 04, 05, 09, and 11 have been used for the baseline and parameter sweep. Hold-out sequences 02, 10, and 13 remain reserved for the final evaluation on Day 17.

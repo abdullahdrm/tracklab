@@ -188,3 +188,15 @@ için yeterli görülmedi.
 Sweep raporları `outputs/mot17/param_sweep/` altındadır. `outputs/` Git dışında
 tutulduğu için tabloda önemli sonuçlar ayrıca kaydedildi. Gün 8 tamamlandı;
 sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
+
+## 2026-10-16: Gün 9 — Kalite ölçümü ve klasik ön işleme
+
+- `src/tracklab/quality/metrics.py` eklendi: BGR kare giriş doğrulaması ve brightness, contrast, Laplacian varyansı tabanlı sharpness ile robust `noise_estimate` hesaplaması.
+- `noise_estimate` bir proxy ölçümdür; doku ve kenarlar da değeri etkileyebileceğinden doğrudan sensör gürültüsü olarak yorumlanmamalıdır.
+- `src/tracklab/quality/report.py` kalite örneklerinin özetini ve `every_n_frames` aralığında kare örneklemesini sağlar. Örnekleme sıfır tabanlı kare indeksi 0'dan başlar; örnek indeksleri ve özet metrikler JSON'a uygun biçimde hazırlanır.
+- Kalite raporu `VideoPipeline` içinde `quality_every_n_frames` ayarıyla üretilir ve `summary["quality"]` altında bellekteki sonuca ve JSON çıktısına eklenir.
+- Klasik ön işleme modülleri eklendi: base doğrulamaları, gamma düzeltmesi, LAB parlaklık kanalında CLAHE, bilateral/Fast Non-Local Means denoise ve factory seçimi.
+- `DenoiseConfig` için Fast Non-Local Means'e özgü `h`/`h_color` parametreleri eklendi.
+- Pipeline entegrasyonunda ön işleme yalnızca tracker girişine uygulanıyor. Kalite metrikleri ve bbox/ID görselleştirmesi orijinal kareyi kullanıyor; kare geometrisi ve `uint8` formatı korunuyor.
+- `configs/preprocessing.yaml` varsayılanı `mode: none` olarak kaldı. Yeni filtrelerin nicel takip etkisi henüz ölçülmedi; gamma/CLAHE/denoise karşılaştırmaları ve bozulma deneyleri Gün 10 kapsamındadır.
+- Doğrulama: 109 test geçti; Ruff lint, format ve `git diff --check` başarılı. Tek uyarı mevcut FastAPI/Starlette `httpx` deprecation uyarısıdır; test başarısını etkilemedi.

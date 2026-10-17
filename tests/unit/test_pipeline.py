@@ -182,3 +182,93 @@ def test_pipeline_cleans_up_raw_video_on_failure(tmp_path: Path) -> None:
     assert tracker.raw_file_seen, "Test sırasında geçici video oluşturulmamış."
     assert not raw_path.exists(), "Hata sonrası geçici video temizlenmedi."
     assert list(output_dir.glob(".*_tracked_raw.mp4")) == []
+
+
+def test_pipeline_includes_quality_sampling_report(tmp_path: Path) -> None:
+    source = tmp_path / "quality_source.mp4"
+    output_dir = tmp_path / "results"
+    create_test_video(source, frame_count=5)
+
+    config = make_config()
+    config.output.save_video = False
+    config.output.save_json = False
+    config.output.save_mot_txt = False
+    config.output.quality_every_n_frames = 2
+
+    run = VideoPipeline(config, tracker=FakeTracker()).run(source, output_dir)
+
+    quality = run.video_result.summary["quality"]
+    assert quality["sampling"] == {
+        "every_n_frames": 2,
+        "frame_index_base": 0,
+    }
+    assert quality["sample_count"] == 3
+    assert quality["sampled_frame_indices"] == [0, 2, 4]
+    assert len(quality["samples"]) == 3
+    assert set(quality["metrics"]) == {
+        "brightness",
+        "contrast",
+        "sharpness",
+        "noise_estimate",
+    }
+    assert list(output_dir.iterdir()) == []
+
+
+@pytest.mark.parametrize("mode", ["none", "gamma"])
+def test_pipeline_preprocesses_tracker_input_but_preserves_original_video_frames(
+    mode: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from tracklab.io.video import read_frames
+    from tracklab.preprocessing.gamma import apply_gamma
+
+    source = tmp_path / f"preprocessing_{mode}.mp4"
+    output_dir = tmp_path / "results"
+    create_test_video(source, frame_count=4)
+
+    config = make_config()
+    config.preprocessing.mode = mode
+    config.preprocessing.gamma.value = 0.8
+    config.output.save_json = False
+    config.output.save_mot_txt = False
+
+    tracked_frames: list[np.ndarray] = []
+    drawn_frames: list[np.ndarray] = []
+
+    class CapturingTracker:
+        def track_frame(self, frame: np.ndarray) -> list[TrackedObject]:
+            tracked_frames.append(frame.copy())
+            return []
+
+    def capture_draw(frame, objects, class_names=None):
+        drawn_frames.append(frame.copy())
+        return frame
+
+    monkeypatch.setattr("tracklab.pipeline.draw_tracks", capture_draw)
+    monkeypatch.setattr("tracklab.pipeline.transcode_video_h264", _fake_transcode)
+
+    run = VideoPipeline(config, tracker=CapturingTracker()).run(source, output_dir)
+    original_frames = [frame for _, frame in read_frames(source)]
+
+    assert run.video_path is not None and run.video_path.is_file()
+    assert len(tracked_frames) == len(original_frames) == 4
+    assert len(drawn_frames) == len(original_frames) == 4
+
+    for original, tracked, drawn in zip(
+        original_frames, tracked_frames, drawn_frames, strict=True
+    ):
+        expected_tracking_input = (
+            apply_gamma(original, gamma=config.preprocessing.gamma.value)
+            if mode == "gamma"
+            else original
+        )
+        np.testing.assert_array_equal(tracked, expected_tracking_input)
+        # Visualization/encoding stays on the original frame, not the transformed one.
+        np.testing.assert_array_equal(drawn, original)
+        assert tracked.shape == original.shape
+        assert tracked.dtype == original.dtype
+
+    if mode == "gamma":
+        assert any(
+            not np.array_equal(original, tracked)
+            for original, tracked in zip(original_frames, tracked_frames, strict=True)
+        )

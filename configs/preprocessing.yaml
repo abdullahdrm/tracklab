@@ -12,6 +12,8 @@ denoise:
   d: 5
   sigma_color: 50
   sigma_space: 50
+  h: 10
+  h_color: 10
 
 chain: [gamma, clahe]
 

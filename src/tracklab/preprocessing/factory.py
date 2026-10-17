@@ -6,53 +6,61 @@ from collections.abc import Callable
 
 from tracklab.config import PreprocessingConfig
 from tracklab.preprocessing.base import Frame, validate_bgr_frame, validate_output_frame
-from tracklab.preprocessing.clahe import apply_clahe
+from tracklab.preprocessing.clahe import build_clahe_preprocessor
+from tracklab.preprocessing.colorspace import build_color_space_preprocessor
 from tracklab.preprocessing.denoise import apply_denoise
-from tracklab.preprocessing.gamma import apply_gamma
+from tracklab.preprocessing.gamma import build_gamma_preprocessor
 
 Preprocessor = Callable[[Frame], Frame]
 
 
 def build_preprocessor(config: PreprocessingConfig) -> Preprocessor:
-    """Return a frame transform for none, gamma, CLAHE, denoise, or chain.
+    """Compile a reusable transform for none, one method, or a fixed chain.
 
-    ``none`` returns the original frame object unchanged. Other modes create
-    a transformed frame and preserve its shape and uint8 BGR representation.
-    The optional router is currently reserved and raises when enabled.
+    Parameter-dependent work (gamma LUT and CLAHE object construction) is done
+    once when a pipeline is built, rather than repeating it for every frame.
+    The optional router is reserved and raises when enabled.
     """
     if config.router.enabled:
         raise NotImplementedError("The preprocessing router is not implemented yet.")
 
-    def process(frame: Frame) -> Frame:
-        validate_bgr_frame(frame)
-        if config.mode == "none":
+    if config.mode == "colorspace":
+        return build_color_space_preprocessor(
+            color_space=config.color_space,
+            order=config.color_space_order,
+            gamma=config.gamma.value,
+            clip_limit=config.clahe.clip_limit,
+            tile_grid=config.clahe.tile_grid,
+        )
+
+    if config.mode == "none":
+
+        def identity(frame: Frame) -> Frame:
+            validate_bgr_frame(frame)
             return frame
 
+        return identity
+
+    operations: dict[str, Preprocessor] = {
+        "gamma": build_gamma_preprocessor(config.gamma.value),
+        "clahe": build_clahe_preprocessor(
+            clip_limit=config.clahe.clip_limit,
+            tile_grid=config.clahe.tile_grid,
+        ),
+        "denoise": lambda image: apply_denoise(image, config.denoise),
+    }
+    selected = config.chain if config.mode == "chain" else [config.mode]
+    try:
+        transforms = tuple(operations[name] for name in selected)
+    except KeyError as exc:
+        raise ValueError(f"Unsupported preprocessing operation: {exc.args[0]}") from exc
+
+    def process(frame: Frame) -> Frame:
+        validate_bgr_frame(frame)
         output = frame
-        operations = {
-            "gamma": lambda image: apply_gamma(image, config.gamma.value),
-            "clahe": lambda image: apply_clahe(
-                image,
-                clip_limit=config.clahe.clip_limit,
-                tile_grid=config.clahe.tile_grid,
-            ),
-            "denoise": lambda image: apply_denoise(image, config.denoise),
-        }
-
-        if config.mode == "chain":
-            selected = config.chain
-        else:
-            selected = [config.mode]
-
-        for operation in selected:
-            try:
-                output = operations[operation](output)
-            except KeyError as exc:
-                raise ValueError(
-                    f"Unsupported preprocessing operation: {operation}"
-                ) from exc
+        for transform in transforms:
+            output = transform(output)
             validate_output_frame(frame, output)
-
         return output
 
     return process

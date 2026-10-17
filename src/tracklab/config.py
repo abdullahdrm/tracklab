@@ -83,13 +83,15 @@ class RouterConfig(StrictModel):
 class PreprocessingConfig(StrictModel):
     """Classical image preprocessing settings."""
 
-    mode: Literal["none", "gamma", "clahe", "denoise", "chain"] = "none"
+    mode: Literal["none", "gamma", "clahe", "denoise", "chain", "colorspace"] = "none"
     gamma: GammaConfig = Field(default_factory=GammaConfig)
     clahe: ClaheConfig = Field(default_factory=ClaheConfig)
     denoise: DenoiseConfig = Field(default_factory=DenoiseConfig)
     chain: list[Literal["gamma", "clahe", "denoise"]] = Field(
         default_factory=lambda: ["gamma", "clahe"]
     )
+    color_space: Literal["lab", "hsv", "ycrcb"] = "lab"
+    color_space_order: Literal["clahe", "gamma_clahe", "clahe_gamma"] = "gamma_clahe"
     router: RouterConfig = Field(default_factory=RouterConfig)
 
 

@@ -297,3 +297,12 @@ Only tuning sequences 04, 05, 09, and 11 have been used for the baseline and par
 ## License
 
 TrackLab source code is released under [AGPL-3.0-only](LICENSE). Third-party dependencies, model weights, and datasets may be subject to separate licensing terms.
+
+<!-- TRACKLAB_DAY10_ABLATIONS -->
+## Week 2 / Day 10 — Preprocessing ablations
+
+The MOT17 tuning-only evaluation compares the unprocessed YOLO11n + ByteTrack baseline against classical preprocessing, controlled synthetic degradations, fixed method chains, and LAB/HSV/YCrCb channel variants. Real-image E2 and synthetic E2b results are documented separately in [`reports/day10_ablation_results.md`](reports/day10_ablation_results.md).
+
+Selected real-image results on the four tuning sequences: baseline HOTA **0.4351** / IDF1 **0.5111**; CLAHE HOTA **0.4512** / IDF1 **0.5373**; gamma → LAB CLAHE HOTA **0.4542** / IDF1 **0.5354**. The exploratory YCrCb CLAHE → Gamma variant reached HOTA **0.4518**, IDF1 **0.5395**, at **41.51 FPS** in its measured run. Results are tuning-only; hold-out sequences 02/10/13 have not been evaluated.
+
+These are controlled pedestrian MOT results, not evidence of real fog/rain robustness or vehicle-classification performance. FPS includes image reading, preprocessing, inference/tracking, and prediction writing, but not TrackEval scoring or the final FastAPI/MP4 encoding path.

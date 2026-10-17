@@ -8,6 +8,7 @@ import json
 import math
 import time
 from collections import defaultdict
+from collections.abc import Callable
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -195,6 +196,9 @@ def run_sequence_tracker(
     detector_kind: str,
     config: Any,
     output_file: str | Path,
+    *,
+    frame_transform: Callable[[np.ndarray], np.ndarray] | None = None,
+    verbose: bool = True,
 ) -> dict[str, float | int]:
     """Generate MOTChallenge predictions for one detector and one sequence."""
 
@@ -243,10 +247,23 @@ def run_sequence_tracker(
                 if detector_kind == "frcnn":
                     detections = frcnn_by_frame[frame_number]
                 else:
+                    inference_frame = frame
+                    if frame_transform is not None:
+                        inference_frame = frame_transform(frame)
+                        if not isinstance(inference_frame, np.ndarray):
+                            raise TypeError("frame_transform must return a NumPy array")
+                        if (
+                            inference_frame.shape != frame.shape
+                            or inference_frame.dtype != frame.dtype
+                        ):
+                            raise ValueError(
+                                "frame_transform must preserve frame shape and dtype"
+                            )
+
                     # Use the ByteTrack low threshold so low-confidence
                     # detections remain available for its second association.
                     predictions = model.predict(
-                        source=frame,
+                        source=inference_frame,
                         imgsz=config.detector.imgsz,
                         conf=getattr(
                             config.detector,
@@ -280,7 +297,9 @@ def run_sequence_tracker(
                 detection_count += len(detections)
                 tracked_count += len(tracked)
 
-                if frame_number % 100 == 0 or frame_number == sequence.seq_length:
+                if verbose and (
+                    frame_number % 100 == 0 or frame_number == sequence.seq_length
+                ):
                     print(
                         f"{detector_kind}: frame {frame_number}/"
                         f"{sequence.seq_length}, "

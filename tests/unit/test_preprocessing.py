@@ -109,3 +109,26 @@ def test_enabled_router_is_explicitly_not_implemented() -> None:
 
     with pytest.raises(NotImplementedError, match="router"):
         build_preprocessor(config)
+
+
+def test_precompiled_factory_transform_matches_direct_transforms() -> None:
+    """Compiled reusable chain should keep the public transforms' pixel results."""
+    from tracklab.config import PreprocessingConfig
+    from tracklab.preprocessing.factory import build_preprocessor
+
+    config = PreprocessingConfig(mode="chain", chain=["gamma", "clahe"])
+    transform = build_preprocessor(config)
+    frame = np.random.default_rng(2026).integers(
+        0, 256, size=(96, 128, 3), dtype=np.uint8
+    )
+    original = frame.copy()
+
+    actual = transform(frame)
+    expected = apply_clahe(
+        apply_gamma(frame, config.gamma.value),
+        config.clahe.clip_limit,
+        config.clahe.tile_grid,
+    )
+
+    np.testing.assert_array_equal(actual, expected)
+    np.testing.assert_array_equal(frame, original)

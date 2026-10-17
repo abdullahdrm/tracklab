@@ -2,7 +2,7 @@
 
 Repoda `docs/TASKS.md` olarak durur. Bir görevi bitirince `[ ]` işaretini `[x]` yap
 (VS Code'da önizleme: Cmd+Shift+V). Kısa notlar için `docs/PROGRESS.md` kullanılır.
-Ayrıntılar `docs/PROJECT_PLAN.md` (devir belgesi) içindedir.
+Ayrıntılar `docs/PROJECT_PLAN.pdf` (devir belgesi) ve `docs/PROJECT_PLAN_ADDENDUM.md` (uygulama güncellemeleri) içindedir.
 
 Kurallar:
 - Her gün sonunda commit at.
@@ -105,12 +105,15 @@ Kurallar:
 **Bitti ölçütü:** Ön işleyiciler geometriyi değiştirmiyor, testler yeşil. Tam proje doğrulaması: 109 test geçti; Ruff ve biçim kontrolleri başarılı.
 
 ### Gün 10: Sentetik bozulmalar ve ablation
-- [ ] `evaluation/degradations.py`, `ablation.py`, `scripts/run_ablation.py`
-- [ ] **E2:** none / gamma / CLAHE / (denoise) gerçek videolarda
-- [ ] **E2b:** aynı deney sentetik bozulmalar altında
+- [x] `evaluation/degradations.py`, `ablation.py`, `scripts/run_ablation.py`
+- [x] **E2:** none / gamma / CLAHE / (denoise) gerçek videolarda
+- [x] **E2b:** aynı deney sentetik bozulmalar altında
 
-**Bitti ölçütü:** Gerçek ve sentetik sonuçlar ayrı tablolarda.
-
+<!-- DAY10_RESULTS_AND_COLORSPACE -->
+- [x] Gerçek ve sentetik sonuçlar ayrı tablolarda `reports/day10_ablation_results.md` içine kaydedildi.
+- [x] Ek araştırma: birleşik işlem sıraları, LAB `L` / HSV `V` / YCrCb `Y` renk-uzayı varyantları ve FPS ölçümü.
+- [x] Gerçek zamanlı üç koşul optimize edilmiş ön işleme koduyla ayrı çıktı dizininde tekrar ölçüldü.
+**Bitti ölçütü:** Gerçek ve sentetik sonuçlar ayrı tablolarda `reports/day10_ablation_results.md` içinde; testler ve lint kontrolleri başarılı.
 ---
 
 ## Hafta 3: Fine-tune ve analitik

@@ -200,3 +200,16 @@ sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
 - Pipeline entegrasyonunda ön işleme yalnızca tracker girişine uygulanıyor. Kalite metrikleri ve bbox/ID görselleştirmesi orijinal kareyi kullanıyor; kare geometrisi ve `uint8` formatı korunuyor.
 - `configs/preprocessing.yaml` varsayılanı `mode: none` olarak kaldı. Yeni filtrelerin nicel takip etkisi henüz ölçülmedi; gamma/CLAHE/denoise karşılaştırmaları ve bozulma deneyleri Gün 10 kapsamındadır.
 - Doğrulama: 109 test geçti; Ruff lint, format ve `git diff --check` başarılı. Tek uyarı mevcut FastAPI/Starlette `httpx` deprecation uyarısıdır; test başarısını etkilemedi.
+
+## 2026-10-17: Gün 10 — Sentetik bozulmalar, ablation ve renk uzayı keşfi
+
+- E2 gerçek görüntü ablation'ı tamamlandı: `none`, `gamma`, `clahe`, `denoise`; dört MOT17 tuning sekansı kullanıldı.
+- E2b sentetik ablation tamamlandı: düşük ışık, düşük kontrast, Gaussian gürültü ve Gaussian blur bozulmalarının her birinde dört ön işleme koşulu (16 koşul) değerlendirildi.
+- Gerçek ve sentetik koşulların ayrı, birleşik TrackEval metrikleri ile tabloları `reports/day10_ablation_results.md` içinde saklanıyor; makine tarafından üretilen JSON'lar `outputs/mot17/ablations/` altındadır ve Git dışında tutulur.
+- Ek deneyler: Gamma/CLAHE işlem sıraları ve LAB `L`, HSV `V`, YCrCb `Y` renk-uzayı/kanal varyantları; dört tuning sekansında gerçekleştirildi. Hold-out 02/10/13 kullanılmadı.
+- Dengeli renk-uzayı adayı `ycrcb_clahe_gamma`: HOTA=0.4518, IDF1=0.5395; birleşik HOTA bakımından `gamma_clahe` daha yüksek çıktı ancak bazı sekanslarda 30 FPS altına indi.
+- FPS ölçümü inference/tracking döngüsünü, ön işleme ve tahmin dosyasına yazımı kapsar; son FastAPI/MP4 kodlama yolunun gecikmesi bu ölçümde dahil değildir. Sentetik bozulma yaratma maliyeti E2b FPS'sine dahildir.
+- Kapsam sınırı: E2b gerçek sis/yağmur videosu değildir; MOT17 değerlendirmesi yalnızca yaya sınıfını ölçer. Araç sınıflandırma ve gerçek sis dayanıklılığı henüz doğrulanmadı.
+- Yeniden kullanılabilir gamma LUT/CLAHE nesnesi ve derlenmiş preprocessor eklendi; piksel sonuçlarının önceki doğrudan çağrılarla eşleşmesi test edildi.
+- Doğrulama: 157 test geçti; Ruff lint, format ve `git diff --check` başarılı. Tek uyarı FastAPI/Starlette/httpx test istemcisi deprecation uyarısıdır; test başarısını etkilemez.
+- Optuna ve YOLO fine-tuning henüz çalıştırılmadı; bunlar Week 3 kapsamına bırakıldı.

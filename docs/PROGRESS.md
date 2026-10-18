@@ -213,3 +213,15 @@ sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
 - Yeniden kullanılabilir gamma LUT/CLAHE nesnesi ve derlenmiş preprocessor eklendi; piksel sonuçlarının önceki doğrudan çağrılarla eşleşmesi test edildi.
 - Doğrulama: 157 test geçti; Ruff lint, format ve `git diff --check` başarılı. Tek uyarı FastAPI/Starlette/httpx test istemcisi deprecation uyarısıdır; test başarısını etkilemez.
 - Optuna ve YOLO fine-tuning henüz çalıştırılmadı; bunlar Week 3 kapsamına bırakıldı.
+
+
+## 2026-10-18: Gün 11 — MOT17 YOLO veri kümesi dönüştürücüsü
+
+- `src/tracklab/datasets/to_yolo.py` MOT17 yaya anotasyonlarını YOLO sınıfı `0` ve normalize edilmiş `xywh` etiketlerine dönüştürür; `tests/unit/test_to_yolo.py` dönüşüm, sınır kırpma ve split güvenliğini test eder.
+- Veri kümesi `data/processed/MOT17_yolo_day11/` altında oluşturuldu. Görüntüler kaynak MOT17 karelerine sembolik bağlantıdır; dosyalar kopyalanmadı.
+- Train: MOT17-04/05/09-FRCNN, 2.412 görüntü ve 59.799 geçerli yaya kutusu. Validation: MOT17-11-FRCNN, 900 görüntü ve 9.436 geçerli yaya kutusu.
+- Toplam 3.312 görüntü için bire bir etiket dosyası üretildi; anotasyonu olmayan görüntülerin boş etiketleri korundu.
+- Denetim `dataset.yaml`, symlink hedefleri, etiket sayısı/şeması, sonlu normalize kutu koordinatları ve sequence-level train/validation ayrımını doğruladı.
+- Hold-out MOT17-02/10/13 görüntü yolları/etiketleri çıktıda bulunmadı; veri kümesi manifestteki tuning=3.312 ve hold-out=2.004 kare sayılarını korur.
+- Yerel doğrulama: 167 test geçti; Ruff lint/format başarılı. Tek uyarı mevcut Starlette/httpx test istemcisi deprecation uyarısıdır; test başarısını etkilemedi.
+- `data/` `.gitignore` kapsamında; üretilmiş görüntü bağlantıları ve etiketler commit'e eklenmeyecek. Kaynak kod, test ve dokümantasyon sürüm kontrolüne alınacak.

@@ -33,3 +33,13 @@
 - Runners: `scripts/run_ablation.py`, `scripts/run_realtime_ablation.py`, `scripts/run_colorspace_ablation.py`.
 - Tests: `tests/unit/test_ablation.py`, `test_degradations.py`, `test_colorspace.py`, and `test_preprocessing.py`.
 - Result report: `reports/day10_ablation_results.md`.
+
+
+## Week 3 / Day 11: YOLO dataset conversion
+
+- Added `src/tracklab/datasets/to_yolo.py` and unit coverage in `tests/unit/test_to_yolo.py`.
+- The generated dataset lives locally at `data/processed/MOT17_yolo_day11/`; images are symbolic links into the MOT17 source, so generated data is not committed.
+- Sequence-level split: train uses MOT17-04/05/09-FRCNN (2,412 frames; 59,799 eligible pedestrian boxes), validation uses MOT17-11-FRCNN (900 frames; 9,436 eligible pedestrian boxes).
+- The converter emits YOLO class `0` labels with normalized `xywh`; clipped boxes must have positive area and finite values in `[0, 1]`. Empty label files are retained for frames without an eligible pedestrian box.
+- Dataset audit verified the YAML paths, frame/label parity, symbolic-link targets within the source MOT17 tree, and absence of hold-out sequences 02/10/13.
+- Full local validation: 167 tests passed; Ruff lint and format passed. Fine-tuning has not started yet.

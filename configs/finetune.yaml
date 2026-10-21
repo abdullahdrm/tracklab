@@ -1,0 +1,14 @@
+# Six-class BDD100K fine-tuning. Defaults describe a future full run;
+# use `python -m training.finetune --train --pilot` for the initial pilot.
+model_path: models/yolo11n.pt
+dataset_yaml: data/processed/BDD100K_yolo6/dataset.yaml
+output_root: outputs/training
+run_name: bdd100k_yolo11n_six_class
+imgsz: 640
+epochs: 30
+batch: 4
+workers: 0
+device: mps
+fraction: 1.0
+amp: false
+patience: 10

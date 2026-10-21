@@ -225,3 +225,15 @@ sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
 - Hold-out MOT17-02/10/13 görüntü yolları/etiketleri çıktıda bulunmadı; veri kümesi manifestteki tuning=3.312 ve hold-out=2.004 kare sayılarını korur.
 - Yerel doğrulama: 167 test geçti; Ruff lint/format başarılı. Tek uyarı mevcut Starlette/httpx test istemcisi deprecation uyarısıdır; test başarısını etkilemedi.
 - `data/` `.gitignore` kapsamında; üretilmiş görüntü bağlantıları ve etiketler commit'e eklenmeyecek. Kaynak kod, test ve dokümantasyon sürüm kontrolüne alınacak.
+
+## 2026-10-21: Gün 12 — BDD100K altı sınıflı fine-tuning altyapısı
+
+- `src/tracklab/datasets/bdd100k_to_yolo.py` ile BDD100K anotasyonlarından altı sınıflı YOLO veri kümesi dönüştürücüsü eklendi. `pedestrian`/`rider` -> `person` eşlemesi ve sınıf sırası testlerle doğrulandı.
+- Veri kümesi: 69.863 train görüntüsü / 847.438 kutu; 10.000 validation görüntüsü / 124.322 kutu. Train ve validation ayrımı korundu.
+- `training/finetune.py`, `configs/finetune.yaml`, `configs/finetune_mps_bench.yaml` ve pilot scripti eklendi. Eğitim açıkça `--train` gerektiriyor; varsayılan komut yalnızca ön koşulları doğruluyor.
+- İlk pilot: `imgsz=640`, `batch=4`, `workers=0`, MPS, 1 epoch ve train verisinin %1'i. 175 batch yaklaşık 36,7 saniye; P=0,467, R=0,0788, mAP50=0,0726, mAP50-95=0,0352.
+- İkinci benchmark pilotu: `imgsz=640`, `batch=8`, MPS, 1 epoch ve train verisinin %1'i. 88 batch yaklaşık 29,6 saniye; P=0,319, R=0,111, mAP50=0,0884, mAP50-95=0,0414. Yaklaşık bellek raporu 3,28 GB.
+- İkinci pilot config'inde `workers=4` olmasına rağmen Ultralytics logu `Using 0 dataloader workers` bildirdi. Bu nedenle dört worker'ın gerçekten kullanıldığı varsayılmıyor. Pilot sonuçları nihai model başarısı veya kesin bir batch karşılaştırması değildir.
+- Yerel doğrulama: 197 test geçti; yeni fine-tuning dosyalarının hedefli Ruff lint ve format kontrolleri başarılı. Ön koşul kontrolü model yolunu, veri kümesini ve altı sınıfın sırasını doğruladı.
+- Mevcut FastAPI/Starlette test istemcisinden bir `httpx` deprecation uyarısı sürüyor. Depodaki diğer dosyalar için toplu Ruff düzeltmesi uygulanmadı.
+- Tam veriyle 30 epoch eğitim henüz başlatılmadı. Gün 13'te çıktı dizini ve checkpoint davranışı kontrol edildikten sonra yapılacak.

@@ -1,0 +1,12 @@
+model_path: models/yolo11n.pt
+dataset_yaml: data/processed/BDD100K_yolo6/dataset.yaml
+output_root: outputs/training
+run_name: bdd100k_yolo11n_b8w4_benchmark
+imgsz: 640
+epochs: 1
+batch: 8
+workers: 4
+device: mps
+fraction: 0.01
+amp: false
+patience: 10

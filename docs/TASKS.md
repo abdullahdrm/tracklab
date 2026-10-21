@@ -125,8 +125,8 @@ Kurallar:
 **Bitti ölçütü:** YOLO veri kümesi sequence-level train/validation ayrımıyla üretildi; tüm görüntü ve etiket dosyaları denetlendi, hold-out sekansları dışarıda bırakıldı.
 
 ### Gün 12-13: Fine-tune
-- [ ] `training/finetune.py`, `configs/finetune.yaml`
-- [ ] Nano model fine-tune (imgsz pilotu)
+- [x] `training/finetune.py`, `configs/finetune.yaml`, `configs/finetune_mps_bench.yaml`, `scripts/run_finetune_pilot.sh`
+- [x] Nano model fine-tune pilotları (`imgsz=640`, batch 4 ve batch 8 benchmark)
 - [ ] `best.pt` ve eğitim metrikleri kaydedildi
 
 ### Gün 14: Fine-tuned vs baseline

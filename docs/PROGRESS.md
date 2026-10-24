@@ -248,3 +248,11 @@ sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
 - Config `workers=4` bildirse de Ultralytics logunda `Using 0 dataloader workers` yazdı; dört worker'ın fiilen kullanıldığı doğrulanmadı.
 - MPS, `scatter_reduce_mps` ve `index_put_with_accumulate_mps` işlemleri için determinism uyarıları verdi; eğitim tamamlandı.
 - Sonuçlar BDD100K validation kümesine aittir; MOT17 takip başarısını veya gerçek video performansını tek başına göstermez. Fine-tuned modelin COCO baseline ile aynı koşullarda karşılaştırılması Gün 14 kapsamındadır.
+
+## 2026-10-24: Gün 14 — E3 fine-tuned vs baseline
+
+- COCO YOLO11n baseline ile BDD100K fine-tuned YOLO11n aynı MOT17 tuning sekanslarında karşılaştırıldı: MOT17-04-FRCNN, MOT17-05-FRCNN, MOT17-09-FRCNN, MOT17-11-FRCNN.
+- Her iki deney aynı imgsz=960, confidence=0.1, IoU=0.7 ve ByteTrack yapılandırmasını kullandı.
+- Birleşik HOTA: COCO=0.4351, fine-tuned=0.3316; IDF1: COCO=0.5111, fine-tuned=0.3790; IDSW: COCO=371, fine-tuned=476.
+- HOTA dört sekansın tamamında geriledi. Fine-tuned model bu MOT17 tuning deneyinde baseline'ı geçemedi.
+- Detaylı birleşik ve sekans bazlı tablo: `reports/e3_finetuned_vs_coco.md`. Hold-out sekansları kullanılmadı.

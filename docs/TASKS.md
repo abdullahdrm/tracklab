@@ -130,7 +130,7 @@ Kurallar:
 - [x] `best.pt` ve eğitim metrikleri kaydedildi
 
 ### Gün 14: Fine-tuned vs baseline
-- [ ] **E3:** tuning iç doğrulamasında karşılaştırma
+- [x] **E3:** tuning iç doğrulamasında karşılaştırma
 
 **Bitti ölçütü:** Önce/sonra tablosu.
 

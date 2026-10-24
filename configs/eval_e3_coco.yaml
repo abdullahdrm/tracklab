@@ -1,0 +1,22 @@
+data_root: data/raw/MOT17/train
+output_root: outputs/mot17/e3_coco
+variant: FRCNN
+default_split: tuning
+splits:
+  tuning:
+  - MOT17-04-FRCNN
+  - MOT17-05-FRCNN
+  - MOT17-09-FRCNN
+  - MOT17-11-FRCNN
+  holdout:
+  - MOT17-02-FRCNN
+  - MOT17-10-FRCNN
+  - MOT17-13-FRCNN
+detectors:
+- yolo
+yolo:
+  model_path: models/yolo11n.pt
+  imgsz: 960
+  confidence: 0.1
+  iou: 0.7
+  device: auto

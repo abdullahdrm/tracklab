@@ -127,7 +127,7 @@ Kurallar:
 ### Gün 12-13: Fine-tune
 - [x] `training/finetune.py`, `configs/finetune.yaml`, `configs/finetune_mps_bench.yaml`, `scripts/run_finetune_pilot.sh`
 - [x] Nano model fine-tune pilotları (`imgsz=640`, batch 4 ve batch 8 benchmark)
-- [ ] `best.pt` ve eğitim metrikleri kaydedildi
+- [x] `best.pt` ve eğitim metrikleri kaydedildi
 
 ### Gün 14: Fine-tuned vs baseline
 - [ ] **E3:** tuning iç doğrulamasında karşılaştırma

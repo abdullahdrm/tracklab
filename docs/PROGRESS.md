@@ -237,3 +237,14 @@ sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
 - Yerel doğrulama: 197 test geçti; yeni fine-tuning dosyalarının hedefli Ruff lint ve format kontrolleri başarılı. Ön koşul kontrolü model yolunu, veri kümesini ve altı sınıfın sırasını doğruladı.
 - Mevcut FastAPI/Starlette test istemcisinden bir `httpx` deprecation uyarısı sürüyor. Depodaki diğer dosyalar için toplu Ruff düzeltmesi uygulanmadı.
 - Tam veriyle 30 epoch eğitim henüz başlatılmadı. Gün 13'te çıktı dizini ve checkpoint davranışı kontrol edildikten sonra yapılacak.
+
+## 2026-10-24: Gün 13 — BDD100K tam fine-tuning sonuçları
+
+- `configs/finetune.yaml` ile YOLO11n altı sınıflı BDD100K eğitimi tamamlandı: 30/30 epoch, 69.863 train görüntüsü, 10.000 validation görüntüsü, `imgsz=640`, batch=4, MPS.
+- Çıktı: `outputs/training/bdd100k_yolo11n_six_class/`. `results.csv`, `weights/best.pt`, `weights/last.pt` ve `tracklab_run_summary.json` oluştu; eğitim kodu gerekli çıktıların varlığını doğruladı.
+- Eğitim logundaki süre: 60,846 saat. Son doğrulama: Precision=0.636, Recall=0.445, mAP50=0.496, mAP50-95=0.305.
+- Sınıf bazlı (P / R / mAP50 / mAP50-95): person 0.618 / 0.482 / 0.528 / 0.250; bicycle 0.538 / 0.279 / 0.307 / 0.152; car 0.670 / 0.733 / 0.754 / 0.476; motorcycle 0.728 / 0.222 / 0.315 / 0.148; bus 0.605 / 0.472 / 0.523 / 0.404; truck 0.656 / 0.480 / 0.547 / 0.400.
+- Bicycle ve motorcycle recall değerleri düşük; sonraki değerlendirmede bu sınıflar için hata analizi gerekli. Henüz oversampling veya class weighting uygulanmadı.
+- Config `workers=4` bildirse de Ultralytics logunda `Using 0 dataloader workers` yazdı; dört worker'ın fiilen kullanıldığı doğrulanmadı.
+- MPS, `scatter_reduce_mps` ve `index_put_with_accumulate_mps` işlemleri için determinism uyarıları verdi; eğitim tamamlandı.
+- Sonuçlar BDD100K validation kümesine aittir; MOT17 takip başarısını veya gerçek video performansını tek başına göstermez. Fine-tuned modelin COCO baseline ile aynı koşullarda karşılaştırılması Gün 14 kapsamındadır.

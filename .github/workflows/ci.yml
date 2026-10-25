@@ -81,5 +81,5 @@ jobs:
             docker rm -f tracklab-ci || true
           }
           trap cleanup EXIT
-          curl --fail --retry 20 --retry-delay 3 \
+          curl --fail --retry 20 --retry-all-errors --retry-delay 3 \
             http://127.0.0.1:18000/health

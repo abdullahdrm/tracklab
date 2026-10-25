@@ -14,7 +14,7 @@ authors = [
     { name = "Abdullah Durum" },
 ]
 dependencies = [
-    "ultralytics",
+    "ultralytics==8.4.175",
     "lap>=0.5.12",
     "pydantic>=2",
     "PyYAML",

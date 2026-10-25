@@ -277,3 +277,7 @@ sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
 - `training/finetune.py`, `cls_remap` ayarını artık config'ten açıkça geçiriyor;
   böylece sonuç Ultralytics varsayılanına bağlı değil.
 - Ayrıntılı karar: `reports/fine_tuning_root_cause.md`.
+- Day 13–14 yeniden kontrolünde, Ultralytics 8.4.175 `DetectionTrainer` yükleme
+  zinciri `Remapped 6/6` ve `Transferred 499/499` bildirdi. MOT17-05 tek-sekans
+  rerun sonuçları mevcut E3 artifact’larıyla birebir eşleşti. Temiz kurulumlarda
+  aynı davranışı korumak için Ultralytics sürümü `8.4.175` olarak pinlendi.

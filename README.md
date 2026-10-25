@@ -15,7 +15,7 @@ MOT17 tracking performance.
 
 ![TrackLab pedestrian tracking demo](docs/assets/demos/pedestrian-tracking.gif)
 
-## Verified demos
+## Demos
 
 Each preview is a compact annotated derivative with detector boxes, track IDs,
 the yellow counting line, directional counters and time-bounded trajectory
@@ -30,15 +30,26 @@ trails. The corresponding H.264 MP4 is linked below each preview.
 The preview shows pedestrian tracking, temporary IDs, line-crossing counts and
 3-second smoothed trails.
 
-### Ordinary road traffic
+### Ordinary road traffic — urban avenue
 
-![Ordinary traffic demo](docs/assets/demos/traffic-daytime.gif)
+![Urban avenue traffic demo](docs/assets/demos/traffic-urban-avenue.gif)
 
-[Download the annotated H.264 MP4](docs/assets/demos/traffic-daytime.mp4)
+[Download the annotated H.264 MP4](docs/assets/demos/traffic-urban-avenue.mp4)
 
-The daytime traffic clip was processed with the default COCO YOLO11n +
-ByteTrack configuration and the default normalized center line. The JSON
-summary records one observed `negative_to_positive` crossing.
+This busy urban avenue clip was processed with the default COCO YOLO11n and
+ByteTrack settings plus an analytics-only vertical line placement. The
+50.5-second run produced 216 unique tracks, 20,572 detections and 26 observed
+line crossings.
+
+### Ordinary road traffic — aerial highway
+
+![Aerial highway traffic demo](docs/assets/demos/traffic-aerial-highway.gif)
+
+[Download the annotated H.264 MP4](docs/assets/demos/traffic-aerial-highway.mp4)
+
+This elevated highway clip uses the same detector and tracker with an
+analytics-only line across the near carriageway. The 30.4-second run produced
+287 unique tracks, 19,752 detections and 44 observed line crossings.
 
 ### Rainy-road traffic
 
@@ -115,11 +126,9 @@ unchanged. Normalized coordinates must be finite values in `[0, 1]` and are
 resolved once against the source video dimensions using the inclusive pixel
 range (`0` through `width - 1` / `height - 1`). The same resolved geometry is
 used by the counter and the overlay renderer, without mutating the loaded
-configuration or changing detector/tracker coordinates.
-
-The default line is the normalized equivalent of `[100, 540]` to
-`[1800, 540]` on a 1920×1080 reference frame. On the 768×432 sample video it
-therefore appears around `x=40..719`, `y=216`.
+configuration or changing detector/tracker coordinates. Demo-specific line
+placements are kept in the corresponding `configs/analytics_demo_*.yaml`
+files.
 
 Start the API locally:
 
@@ -163,8 +172,6 @@ detector config selects `device: auto`.
 
 The canonical Compose file is the reproducible deployment path: it mounts
 models, data and outputs, and runs the CPU API behind the local port above.
-The Dockerfile uses a BuildKit pip cache mount to reduce repeated dependency
-download time on ARM64 hosts.
 
 ## Measured results
 
@@ -186,17 +193,13 @@ MOT17 objective. See [`reports/fine_tuning_root_cause.md`](reports/fine_tuning_r
 [`reports/day17_final_evaluation.md`](reports/day17_final_evaluation.md), and
 [`reports/error_analysis.md`](reports/error_analysis.md).
 
-The analytics line-resolution path is independent of the fine-tuning and
-MOT17 evaluation paths; the recorded fine-tuning regression is therefore not
-explained by this analytics fix.
-
 ![Hold-out results](docs/assets/holdout_results.png)
 
 ### Tracker ablation
 
-Day 16 tested a small, tuning-only ByteTrack search. `match_thresh=0.9` gave
-the best combined HOTA (0.4483) and IDF1 (0.5324), but regressed on MOT17-05;
-the balanced baseline was therefore retained for the final evaluation.
+A tuning-only ByteTrack ablation found that `match_thresh=0.9` gave the best
+combined HOTA (0.4483) and IDF1 (0.5324), but regressed on MOT17-05; the
+balanced baseline was therefore retained for the final evaluation.
 
 ![Tracker ablation](docs/assets/tracker_ablation.png)
 
@@ -216,11 +219,11 @@ After preparing MOT17 and placing `models/yolo11n.pt` in the expected path:
 # Tuning baseline
 python scripts/evaluate_mot.py --split tuning --detectors yolo
 
-# Day 16 tracker search, tuning only
+# Tracker search, tuning only
 python scripts/run_tracker_ablation.py \
   --output-root outputs/mot17/tracker_ablation_day16
 
-# Day 17 frozen hold-out
+# Frozen hold-out evaluation
 python scripts/run_final_holdout.py \
   --protocol configs/day17_final_protocol.yaml
 ```
@@ -254,7 +257,6 @@ formatting, Compose configuration and `git diff --check`.
 | `reports/` | Audited experiment results and limitations |
 | `MODEL_CARD.md` | Model provenance, intended use and risks |
 | `DATA_LICENSES.md` | Dataset and third-party attribution notes |
-| `docs/TASKS.md` | Day-by-day project acceptance checklist |
 
 ## Limitations
 
@@ -264,8 +266,6 @@ formatting, Compose configuration and `git diff --check`.
   degradation on MOT17. It is not the default model.
 - The E5 manual count is a bounded one-sequence audit, not a general human-count
   accuracy benchmark.
-- A fresh full Docker dependency rebuild can be slow on ARM64 because of the
-  large Torch wheel.
 - The FastAPI service is a local demo: authentication, quotas, durable worker
   queues and production observability are not implemented.
 

@@ -72,19 +72,38 @@ stock downloads are not included.
 - Published derivatives: `docs/assets/demos/pedestrian-tracking.gif` and
   `docs/assets/demos/pedestrian-tracking.mp4`.
 
-### Ordinary road traffic
+### Ordinary road traffic — urban avenue
 
-- Source page: [Vehicles Driving on Road During Daytime — Pexels video
-  4887833](https://www.pexels.com/video/vehicles-driving-on-road-during-daytime-4887833/).
-- Download route used: [Pexels supported download endpoint](https://www.pexels.com/download/video/4887833/).
-- Uploader shown on the source page: Sapol Churanon.
+- Source page: [Traffic on Avenida Afonso Schmidt, Santos — Pexels video
+  25865043](https://www.pexels.com/video/transito-de-veiculos-na-avenida-afonso-schmidt-em-santos-25865043/).
+- Download route used: [Pexels supported download endpoint](https://www.pexels.com/download/video/25865043/).
+- Uploader shown on the source page: FÁBIO REIS DE ABREU (PORTUGA).
 - Terms: [Pexels license](https://www.pexels.com/legal-pages/license/).
-- Page metadata: 3840×2160, 60 FPS, 0:06. Measured downloaded stream: H.264,
-  3840×2160, 30 FPS, 5.65 seconds, 169 frames.
-- Suitability check: bright multi-lane urban traffic with clear vehicle motion;
-  the default pipeline produced visible IDs and one observed line crossing.
-- Published derivatives: `docs/assets/demos/traffic-daytime.gif` and
-  `docs/assets/demos/traffic-daytime.mp4`.
+- Page metadata: 1920×1080, 59.94 FPS, 0:50. Measured downloaded stream:
+  H.264, 1920×1080, 59.94 FPS, 50.53 seconds, 3,029 frames.
+- Suitability check: busy side-on urban traffic with clearly observable vehicle
+  motion. The default detector and tracker produced visible IDs, 216 unique
+  tracks and 26 observed line crossings; the line placement is analytics-only.
+- Published derivatives: `docs/assets/demos/traffic-urban-avenue.gif` and
+  `docs/assets/demos/traffic-urban-avenue.mp4`.
+- Pexels does not require attribution; the source page and uploader are listed
+  here for provenance.
+
+### Ordinary road traffic — aerial highway
+
+- Source page: [Aerial View of Flow of Traffic in the Highway — Pexels video
+  3078508](https://www.pexels.com/video/aerial-view-of-flow-of-traffic-in-the-highway-3078508/).
+- Download route used: [Pexels supported download endpoint](https://www.pexels.com/download/video/3078508/).
+- Uploader shown on the source page: Mostafa Meraji.
+- Terms: [Pexels license](https://www.pexels.com/legal-pages/license/).
+- Page metadata: 1920×1080, 29.97 FPS, 0:30. Measured downloaded stream:
+  H.264, 1920×1080, 29.97 FPS, 30.40 seconds, 911 frames.
+- Suitability check: elevated highway traffic with clear vehicle motion across
+  multiple lanes. The default detector and tracker produced visible IDs, 287
+  unique tracks and 44 observed line crossings; the line placement is
+  analytics-only.
+- Published derivatives: `docs/assets/demos/traffic-aerial-highway.gif` and
+  `docs/assets/demos/traffic-aerial-highway.mp4`.
 - Pexels does not require attribution; the source page and uploader are listed
   here for provenance.
 

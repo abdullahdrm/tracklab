@@ -1,0 +1,16 @@
+point: foot
+
+lines:
+  - id: line_1
+    coordinate_space: normalized
+    # Span the main near-field carriageway in the aerial view.
+    p1: [0.2, 0.7]
+    p2: [0.82, 0.7]
+
+min_track_age: 5
+cooldown_frames: 15
+
+trajectories:
+  min_len: 10
+  smooth_window: 5
+  trail_duration_seconds: 3.0

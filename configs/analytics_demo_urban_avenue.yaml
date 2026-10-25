@@ -1,0 +1,16 @@
+point: foot
+
+lines:
+  - id: line_1
+    coordinate_space: normalized
+    # Vehicles cross this vertical line as they travel across the avenue view.
+    p1: [0.5, 0.2]
+    p2: [0.5, 0.95]
+
+min_track_age: 5
+cooldown_frames: 15
+
+trajectories:
+  min_len: 10
+  smooth_window: 5
+  trail_duration_seconds: 3.0

@@ -281,3 +281,17 @@ sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
   zinciri `Remapped 6/6` ve `Transferred 499/499` bildirdi. MOT17-05 tek-sekans
   rerun sonuçları mevcut E3 artifact’larıyla birebir eşleşti. Temiz kurulumlarda
   aynı davranışı korumak için Ultralytics sürümü `8.4.175` olarak pinlendi.
+
+## 2026-10-25: Gün 16 — Tracker ablation
+
+- E4 tamamlandı: `track_buffer`, `match_thresh` ve yüksek/yeni track eşikleri için
+  altı aday, COCO YOLO11n + ByteTrack ile dört tuning sekansında çalıştırıldı.
+- Baseline birleşik sonuçları: HOTA=0.4351, MOTA=0.4725, IDF1=0.5111,
+  IDSW=371.
+- `match_thresh=0.9` birleşik HOTA=0.4483, IDF1=0.5324 ve IDSW=327 verdi;
+  ancak MOT17-05'te HOTA/MOTA/IDF1 geriledi. Dengeli kriter nedeniyle üretim
+  tracker'ı değiştirilmedi.
+- `buffer60` kazanımı çok küçük kaldı ve IDSW arttı; `match07` belirgin biçimde
+  geriledi. `thresholds015` de baseline'ı dengeli biçimde geçmedi.
+- Hold-out sekansları 02/10/13 bu deneyde kullanılmadı. Ayrıntılı sonuç:
+  `reports/day16_tracker_ablation.md`.

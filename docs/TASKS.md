@@ -146,7 +146,11 @@ Kurallar:
 ## Hafta 4: Teslim
 
 ### Gün 16: Tracker parametreleri
-- [ ] **E4:** `track_buffer`, `match_thresh`, eşikler (küçük tarama, tuning'de)
+- [x] **E4:** `track_buffer`, `match_thresh`, eşikler (küçük tarama, tuning'de)
+
+  Sonuç: `reports/day16_tracker_ablation.md`. Dengeli sekans kriteri nedeniyle
+  mevcut baseline tracker ayarları korundu; `match_thresh=0.9` yalnızca
+  birleşik metriklere göre daha iyi görünse de MOT17-05'te geriledi.
 
 ### Gün 17: Final değerlendirme
 - [ ] Hold-out üzerinde final değerlendirme (bir kez)

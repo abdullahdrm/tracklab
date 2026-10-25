@@ -36,6 +36,19 @@ class FakeTracker:
         ]
 
 
+class SequenceTracker:
+    """Return a configured object sequence without loading a model."""
+
+    def __init__(self, sequence: list[list[TrackedObject]]) -> None:
+        self.sequence = sequence
+        self.calls = 0
+
+    def track_frame(self, frame: np.ndarray) -> list[TrackedObject]:
+        objects = self.sequence[self.calls]
+        self.calls += 1
+        return objects
+
+
 def make_config():
     """Load the actual project configuration."""
 
@@ -150,6 +163,44 @@ def test_pipeline_passes_one_resolved_line_to_counter_and_renderer(
     assert run.video_result.config["analytics"]["lines"][0]["coordinate_space"] == (
         "normalized"
     )
+
+
+def test_pipeline_expires_disappeared_visual_trails_using_source_fps(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    source = tmp_path / "trail_source.mp4"
+    create_test_video(source, frame_count=8)
+    config = make_config()
+    config.analytics.trajectories.min_len = 1
+    config.analytics.trajectories.smooth_window = 1
+    config.analytics.trajectories.trail_duration_seconds = 0.5
+    config.output.save_json = False
+    config.output.save_mot_txt = False
+
+    obj = TrackedObject(11, 5.0, 5.0, 40.0, 35.0, 0.9, 2)
+    captured: list[dict[int, list[tuple[float, float]]]] = []
+
+    def capture_analytics(frame, *, lines, line_counts=None, trajectories=None):
+        captured.append(
+            {
+                track_id: list(points)
+                for track_id, points in (trajectories or {}).items()
+            }
+        )
+        return frame
+
+    monkeypatch.setattr("tracklab.pipeline.draw_analytics", capture_analytics)
+    run = VideoPipeline(
+        config,
+        tracker=SequenceTracker([[obj], [obj], [], [], [], [], [], []]),
+    ).run(source, tmp_path / "results")
+
+    assert len(captured) == 8
+    assert captured[1][11]
+    assert captured[6][11]
+    assert 11 not in captured[7]
+    assert len(run.video_result.summary["analytics"]["trajectories"]["11"]) == 2
 
 
 def test_default_tracker_is_created_once_per_run(

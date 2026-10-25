@@ -219,6 +219,21 @@ Kurallar:
   768×432, 25 FPS ve 20,2 saniye. Görsel çizgi konumu `y=216` olarak doğrulandı.
 - [x] README ve denetim raporu doğrulanmış sınırlamalarla güncellendi
 
+### Gün 22: Zaman tabanlı trajectory trail ve demo lisans denetimi
+
+- [x] `trail_duration_seconds` config alanı eklendi; varsayılan 3,0 saniye.
+- [x] Trail görünürlüğü kaynak video frame index/FPS zaman damgasına göre
+  sınırlandırıldı; kaybolan track'lerin izleri de süre sonunda siliniyor.
+- [x] JSON trajectory summary tam geçmişi koruyor; smoothing davranışı testlerle
+  korunuyor.
+- [x] `sample.mp4`, `sample2.mp4` ve sağlanan `sample3.mp4` gerçek default
+  COCO YOLO11n + ByteTrack pipeline'ından geçirildi; çizgi geçişleri JSON ve
+  çıktı videolarında doğrulandı.
+- [x] Pexels kaynağı doğrulanan yaya demosu için küçük MP4/GIF üretildi.
+- [ ] iStock watermarked `sample2.mp4` ve `sample3.mp4` için kamuya açık demo
+  varlığı yayımlanmadı; satın alma/redistribution hakkı ve beklenen içerik
+  eşleşmesi eksik.
+
 Fresh dependency-layer Docker build was attempted but the ARM64 Torch download
 stalled; application behavior was decisively verified in a derived image from
 the existing dependency-identical image. No dependency or training run was

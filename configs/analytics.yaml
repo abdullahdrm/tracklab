@@ -13,3 +13,4 @@ cooldown_frames: 15
 trajectories:
   min_len: 10
   smooth_window: 5
+  trail_duration_seconds: 3.0

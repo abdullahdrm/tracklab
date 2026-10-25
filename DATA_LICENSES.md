@@ -59,11 +59,35 @@ applicable third-party terms.
 
 ## Local sample videos
 
-- `data/sample.mp4`, `data/sample1.mp4` and `data/sample2.mp4` are local sample
-  inputs used for pipeline demonstrations and are ignored by Git.
-- Their original source URLs and redistribution terms are not recorded in the
-  repository. Treat them as local-only inputs until provenance and licensing
-  are verified; the generated demo video is therefore not committed.
+- `data/sample.mp4` is a pedestrian street clip. macOS download metadata records
+  the Pexels CDN URL for video `10531835`; the corresponding provider page is
+  [Pexels video 10531835](https://www.pexels.com/video/10531835/). The
+  [Pexels license](https://www.pexels.com/license/) permits free use and
+  modification, including commercial use, without required attribution. It
+  does prohibit redistributing the unmodified asset on another stock platform
+  and does not grant rights to depicted third-party marks or people. The
+  annotated, edited preview in `docs/assets/demos/` is therefore published as
+  a project demonstration; no Pexels attribution is required. The exact
+  uploader name was not recoverable from the local metadata.
+- `data/sample2.mp4` is not a normal-weather traffic clip. Its download
+  metadata identifies iStock/Getty item `1209071519`, [Motorway traffic
+  driving in hazardous sleet](https://www.istockphoto.com/video/motorway-traffic-driving-in-hazardous-sleet-gm1209071519-349602656).
+  The local file is a watermarked preview. The [iStock Content License
+  Agreement](https://www.istockphoto.com/legal/license-agreement) permits use
+  only under an applicable purchased license and expressly limits watermarked
+  content to test/sample-layout use; it cannot be used in publicly available
+  final materials. No purchase or redistribution permission is documented, so
+  neither the source nor an annotated derivative is committed.
+- The provided `sample3.mp4` is also identified from download metadata as an
+  iStock/Getty item, `1251770963`, [Trucks and cars on a
+  highway](https://www.istockphoto.com/tr/video/kamyonlar-ve-arabalar-y%C3%BCksek-yolda-gm1251770963-365061926).
+  Visual inspection shows a sunny highway, not rainy-road traffic, and the
+  file carries an iStock watermark. The same iStock terms apply; no purchase,
+  attribution instruction, or public redistribution permission is documented.
+  It remains local-only and is not committed.
+- All three files are local sample inputs and remain ignored by Git. The three
+  clips were processed for validation on 2026-10-25, but only the Pexels-based
+  pedestrian derivative was eligible for publication on the evidence above.
 
 ## Project source
 

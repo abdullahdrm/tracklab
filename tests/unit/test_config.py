@@ -21,6 +21,7 @@ def test_loads_default_configuration() -> None:
     assert config.tracker.track_buffer == 30
     assert config.preprocessing.mode == "none"
     assert config.analytics.point == "foot"
+    assert config.analytics.trajectories.trail_duration_seconds == 3.0
     assert config.output.save_video is True
     assert config.output.save_json is True
     assert config.tracker_yaml.is_file()

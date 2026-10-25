@@ -174,7 +174,8 @@ class VideoPipeline:
                     )
                     analytics_started = time.perf_counter()
                     line_counter.update(frame_index, objects)
-                    trajectory_store.update(objects)
+                    timestamp_s = frame_index / meta.fps
+                    trajectory_store.update(objects, timestamp_s=timestamp_s)
                     latency_seconds["analytics"] += (
                         time.perf_counter() - analytics_started
                     )
@@ -215,7 +216,9 @@ class VideoPipeline:
                             annotated,
                             lines=resolved_lines,
                             line_counts=line_counter.counts,
-                            trajectories=trajectory_store.visible_trajectories(),
+                            trajectories=trajectory_store.visible_trajectories(
+                                timestamp_s=timestamp_s
+                            ),
                         )
                         latency_seconds["draw"] += time.perf_counter() - draw_started
                         output_started = time.perf_counter()

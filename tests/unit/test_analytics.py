@@ -166,3 +166,38 @@ def test_trajectory_store_smooths_and_filters_short_tracks() -> None:
     assert len(trajectories[4]) == 3
     assert trajectories[4][1][0] == 0.5
     assert store.summary()["4"][-1] == [1.5, 11.0]
+
+
+def test_trajectory_store_limits_visible_points_to_the_configured_time_window() -> None:
+    config = TrajectoryConfig(min_len=1, smooth_window=1, trail_duration_seconds=1.0)
+    store = TrajectoryStore(config)
+
+    for timestamp_s in (0.0, 0.5, 1.0, 1.5):
+        store.update([_object(4, timestamp_s, 10)], timestamp_s=timestamp_s)
+
+    visible = store.visible_trajectories(timestamp_s=1.5)
+
+    assert visible[4] == [(0.5, 11.0), (1.0, 11.0), (1.5, 11.0)]
+    assert len(store.summary()["4"]) == 4
+
+
+def test_disappeared_track_trail_expires_without_new_points() -> None:
+    config = TrajectoryConfig(min_len=1, smooth_window=1, trail_duration_seconds=1.0)
+    store = TrajectoryStore(config)
+    store.update([_object(4, 0.0, 10)], timestamp_s=0.0)
+    store.update([_object(4, 0.5, 10)], timestamp_s=0.5)
+
+    assert store.visible_trajectories(timestamp_s=1.49)[4]
+    assert store.visible_trajectories(timestamp_s=1.51) == {}
+    assert len(store.summary()["4"]) == 2
+
+
+@pytest.mark.parametrize("fps", [10.0, 29.97, 60.0])
+def test_trail_expiration_uses_the_source_video_fps(fps: float) -> None:
+    config = TrajectoryConfig(min_len=1, smooth_window=1, trail_duration_seconds=3.0)
+    store = TrajectoryStore(config)
+    last_frame = int(fps * 3.0)
+    store.update([_object(4, 0.0, 10)], timestamp_s=0.0)
+
+    assert store.visible_trajectories(timestamp_s=last_frame / fps)[4]
+    assert store.visible_trajectories(timestamp_s=(last_frame + 1) / fps) == {}

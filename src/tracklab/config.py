@@ -135,6 +135,7 @@ class TrajectoryConfig(StrictModel):
 
     min_len: PositiveInt = 10
     smooth_window: PositiveInt = 5
+    trail_duration_seconds: float = Field(default=3.0, gt=0.0)
 
 
 class AnalyticsConfig(StrictModel):

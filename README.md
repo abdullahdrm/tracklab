@@ -19,6 +19,37 @@ The full locally generated demo is 74.2 seconds at 960×540:
 `outputs/final_demo/tracklab_final_demo.mp4`. It is not committed because its
 source clips are local data with separate licensing terms.
 
+## Verified demos
+
+The repository includes one compact, redistributable preview. The other two
+local clips were processed and visually verified, but their watermarked iStock
+previews cannot be published under the available evidence; see
+[`DATA_LICENSES.md`](DATA_LICENSES.md).
+
+### Pedestrian tracking
+
+![Pedestrian tracking demo](docs/assets/demos/pedestrian-tracking.gif)
+
+[Download the H.264 MP4 preview](docs/assets/demos/pedestrian-tracking.mp4)
+
+Source: `data/sample.mp4`, identified from local download metadata as Pexels
+video 10531835. The 6-second preview includes detector boxes, track IDs,
+smoothed trails, the yellow counting line and visible directional counter
+changes.
+
+### Normal road traffic and rainy-road traffic
+
+Both requested traffic clips were processed locally with the default COCO
+YOLO11n + ByteTrack pipeline and produced valid annotated H.264 outputs with
+directional crossings. The provided `data/sample2.mp4` is actually a
+watermarked rainy/sleet motorway clip, while the provided `sample3.mp4` is a
+watermarked sunny highway clip rather than rainy-road footage. Neither is
+published in this repository until redistribution rights are documented.
+
+Trajectory trails use a configurable time window, defaulting to 3 seconds in
+`configs/analytics.yaml`. The complete smoothed trajectory history remains in
+each JSON summary even after older points expire from the rendered trail.
+
 ## Architecture
 
 ![TrackLab architecture](docs/assets/architecture.svg)
@@ -33,7 +64,8 @@ selected pipeline config.
 - YOLO detection with configurable weights, resolution, confidence, IoU and classes.
 - ByteTrack identity tracking with explicit threshold and buffer settings.
 - Optional gamma, CLAHE, denoise, chained and color-space preprocessing.
-- Directional line-crossing counts and smoothed trajectories.
+- Directional line-crossing counts and time-bounded smoothed trajectories
+  (3-second visualization default; complete history retained in JSON).
 - Sampled brightness, contrast, sharpness and noise-proxy quality metrics.
 - H.264 MP4, JSON and optional MOTChallenge text output.
 - FastAPI upload UI with persistent job status and health endpoint.

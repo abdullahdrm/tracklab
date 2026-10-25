@@ -376,3 +376,26 @@ sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
   dependency-identical image üzerinden kaynak kodu içeren doğrulama image'ı
   kullanıldı; Dockerfile'a gelecek build'ler için pip cache mount eklendi.
 - Ayrıntılı rapor: `reports/analytics_resolution_audit.md`.
+
+## 2026-10-25: Gün 22 — Zaman tabanlı trajectory trail ve demo doğrulaması
+
+- `TrajectoryConfig.trail_duration_seconds` eklendi; varsayılan değer 3,0 saniye.
+  Pipeline kaynak video frame index'ini gerçek FPS'e bölerek her çıktı karesinin
+  zamanını hesaplıyor. Görsel trail yalnızca bu pencereyi kullanıyor; kaybolan
+  track'ler yeni nokta gelmeden de süresi dolunca görünümden kalkıyor.
+- JSON `analytics.trajectories` geçmişi pencereyle kırpılmıyor; tüm track geçmişi
+  ve mevcut trailing-average smoothing korunuyor.
+- Yeni regresyon testleri sürekli trail, kaybolan track expiry, 10/29.97/60 FPS,
+  tam JSON geçmişi, smoothing uyumluluğu ve gerçek pipeline entegrasyonunu
+  kapsıyor.
+- Üç yerel giriş default COCO YOLO11n + ByteTrack ile işlendi:
+  `sample.mp4` 279 kare / 3.377 tespit / 90 track / 9 crossing;
+  `sample2.mp4` 505 / 4.984 / 153 / 21 crossing;
+  `sample3.mp4` 846 / 3.196 / 86 / 10 crossing. Üç çıktı da H.264 ve kaynak
+  çözünürlük/FPS bilgisini koruyor.
+- İçerik denetimi `sample2.mp4`'nin watermarked iStock sleet klibi,
+  `sample3.mp4`'nin watermarked ve güneşli iStock highway klibi olduğunu gösterdi;
+  `sample3.mp4` beklenen rainy-road içeriğiyle eşleşmiyor. Pexels kaynağı doğrulanan
+  yaya klibi için `docs/assets/demos/pedestrian-tracking.mp4` (817 KiB) ve
+  `pedestrian-tracking.gif` (7,508,415 bytes) yayımlandı; iStock türevleri
+  lisans kanıtı olmadan yayımlanmadı.

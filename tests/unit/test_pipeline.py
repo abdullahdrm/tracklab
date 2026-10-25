@@ -110,6 +110,48 @@ def test_pipeline_writes_video_json_and_mot_outputs(
     assert mot_lines[-1].startswith("4,11,")
 
 
+def test_pipeline_passes_one_resolved_line_to_counter_and_renderer(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("tracklab.pipeline.transcode_video_h264", _fake_transcode)
+    source = tmp_path / "normalized_source.mp4"
+    create_test_video(source, frame_count=2)
+
+    config = make_config()
+    captured_lines = []
+    counter_lines = []
+
+    from tracklab.analytics.line_counter import LineCounter as RealLineCounter
+
+    class CapturingLineCounter(RealLineCounter):
+        def __init__(self, config, lines=None):
+            counter_lines.append(tuple(lines or ()))
+            super().__init__(config, lines=lines)
+
+    def capture_analytics(frame, *, lines, line_counts=None, trajectories=None):
+        captured_lines.append(tuple(lines))
+        return frame
+
+    monkeypatch.setattr("tracklab.pipeline.draw_analytics", capture_analytics)
+    monkeypatch.setattr("tracklab.pipeline.LineCounter", CapturingLineCounter)
+
+    run = VideoPipeline(config, tracker=FakeTracker()).run(
+        source,
+        tmp_path / "results",
+    )
+
+    assert len(captured_lines) == 2
+    resolved = captured_lines[0]
+    assert resolved == captured_lines[1]
+    assert counter_lines == [resolved]
+    assert resolved[0].coordinate_space == "pixels"
+    assert resolved[0].p1 == pytest.approx((63 * 0.052083333333333336, 47 * 0.5))
+    assert resolved[0].p2 == pytest.approx((63 * 0.9375, 47 * 0.5))
+    assert run.video_result.config["analytics"]["lines"][0]["coordinate_space"] == (
+        "normalized"
+    )
+
+
 def test_default_tracker_is_created_once_per_run(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -9,6 +9,7 @@ from typing import Protocol
 import numpy as np
 from numpy.typing import NDArray
 
+from tracklab.analytics.geometry import resolve_lines
 from tracklab.analytics.line_counter import LineCounter
 from tracklab.analytics.trajectories import TrajectoryStore
 from tracklab.config import PipelineConfig
@@ -86,6 +87,11 @@ class VideoPipeline:
         output_root.mkdir(parents=True, exist_ok=True)
 
         meta = probe_video(source)
+        resolved_lines = resolve_lines(
+            self.config.analytics.lines,
+            width=meta.width,
+            height=meta.height,
+        )
 
         video_path = (
             output_root / f"{source.stem}_tracked.mp4"
@@ -110,7 +116,7 @@ class VideoPipeline:
         )
 
         frames: list[FrameResult] = []
-        line_counter = LineCounter(self.config.analytics)
+        line_counter = LineCounter(self.config.analytics, lines=resolved_lines)
         trajectory_store = TrajectoryStore(self.config.analytics.trajectories)
         unique_track_ids: set[int] = set()
         objects_by_class_id: dict[str, int] = {}
@@ -207,7 +213,7 @@ class VideoPipeline:
                         )
                         annotated = draw_analytics(
                             annotated,
-                            lines=self.config.analytics.lines,
+                            lines=resolved_lines,
                             line_counts=line_counter.counts,
                             trajectories=trajectory_store.visible_trajectories(),
                         )

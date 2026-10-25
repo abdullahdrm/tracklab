@@ -351,3 +351,28 @@ sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
   observability ve dağıtım/lisans kontrolleri canlı servis için hazır değil.
 - `v1.0` etiketi oluşturulup GitHub'a gönderildi. Ayrıntılar:
   `reports/day20_delivery.md`.
+
+## 2026-10-25: Gün 21 — Çözünürlük bağımsız analytics ve Docker denetimi
+
+- `LineConfig` artık açıkça `pixels` veya `[0, 1]` aralığında `normalized`
+  koordinat alanı kullanıyor; eski pixel konfigürasyonları değişmeden kalıyor.
+- Normalize çizgiler `probe_video` ile öğrenilen kaynak boyutuna göre inclusive
+  pixel aralığına çözülüyor. Pipeline aynı çözülmüş çizgiyi hem `LineCounter`
+  hem `draw_analytics` için kullanıyor; ortak config mutate edilmiyor.
+- Varsayılan çizgi 1920×1080 referansındaki `[100,540]`–`[1800,540]`
+  geometrisinin normalize ifadesine taşındı.
+- Yeni regresyon testleri sınırları, sonlu/aralık doğrulamasını, yönlü geçişi,
+  iki çözünürlükte config tekrar kullanımını ve counter/renderer geometri
+  eşleşmesini kapsıyor.
+- Fine-tuning ve MOT17 değerlendirme kod yolları denetlendi: analytics config'i
+  eğitime veya TrackEval ölçümüne girmiyor; raw detector düşüşü bu bug ile
+  açıklanamıyor. Yeniden eğitim çalıştırılmadı.
+- Tam test paketi `214 passed, 1 warning`; Ruff, format, Compose config ve diff
+  kontrolleri başarılı.
+- İzole Docker API doğrulaması başarılı: 505 kare, 4.890 tespit, 145 track,
+  23 crossing, JSON/MP4 indirme, H.264 768×432 çıktı ve görsel olarak `y=216`
+  çizgi doğrulaması.
+- Fresh Docker dependency build ARM64 Torch indirmesinde takıldığı için mevcut
+  dependency-identical image üzerinden kaynak kodu içeren doğrulama image'ı
+  kullanıldı; Dockerfile'a gelecek build'ler için pip cache mount eklendi.
+- Ayrıntılı rapor: `reports/analytics_resolution_audit.md`.

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from math import isfinite
 from pathlib import Path
 from typing import Literal
 
@@ -12,6 +13,7 @@ from pydantic import (
     Field,
     PositiveInt,
     field_validator,
+    model_validator,
 )
 
 
@@ -96,11 +98,36 @@ class PreprocessingConfig(StrictModel):
 
 
 class LineConfig(StrictModel):
-    """A line used for directional pedestrian counting."""
+    """A line used for directional pedestrian counting.
+
+    ``pixels`` preserves the legacy interpretation of ``p1`` and ``p2`` as
+    source-frame pixel coordinates. ``normalized`` interprets both points as
+    fractions of the inclusive pixel range, from 0.0 through 1.0.
+    """
 
     id: str
     p1: tuple[float, float]
     p2: tuple[float, float]
+    coordinate_space: Literal["pixels", "normalized"] = "pixels"
+
+    @field_validator("p1", "p2")
+    @classmethod
+    def validate_finite_coordinates(
+        cls, value: tuple[float, float]
+    ) -> tuple[float, float]:
+        if not all(isfinite(coordinate) for coordinate in value):
+            raise ValueError("line coordinates must be finite")
+        return value
+
+    @model_validator(mode="after")
+    def validate_normalized_coordinates(self) -> LineConfig:
+        if self.coordinate_space == "normalized":
+            coordinates = (*self.p1, *self.p2)
+            if not all(0.0 <= coordinate <= 1.0 for coordinate in coordinates):
+                raise ValueError(
+                    "normalized line coordinates must be within [0.0, 1.0]"
+                )
+        return self
 
 
 class TrajectoryConfig(StrictModel):

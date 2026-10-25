@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -26,8 +27,9 @@ RUN groupadd --system tracklab \
 COPY pyproject.toml README.md LICENSE ./
 COPY src/ ./src/
 
-RUN python -m pip install --upgrade pip \
-    && python -m pip install --no-cache-dir .
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m pip install --upgrade pip \
+    && python -m pip install .
 
 COPY configs/ ./configs/
 

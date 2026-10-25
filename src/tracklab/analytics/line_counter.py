@@ -23,9 +23,20 @@ class _TrackLineState:
 class LineCounter:
     """Count directional crossings while suppressing short-lived track noise."""
 
-    def __init__(self, config: AnalyticsConfig) -> None:
+    def __init__(
+        self,
+        config: AnalyticsConfig,
+        lines: tuple[LineConfig, ...] | list[LineConfig] | None = None,
+    ) -> None:
         self.config = config
-        self.lines: tuple[LineConfig, ...] = tuple(config.lines)
+        self.lines: tuple[LineConfig, ...] = tuple(
+            config.lines if lines is None else lines
+        )
+        if any(line.coordinate_space != "pixels" for line in self.lines):
+            raise ValueError(
+                "LineCounter requires resolved pixel-space lines; "
+                "resolve them with frame dimensions first"
+            )
         self._states: dict[tuple[str, int], _TrackLineState] = {}
         self._counts: dict[str, dict[str, int]] = {
             line.id: {"positive_to_negative": 0, "negative_to_positive": 0}

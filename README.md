@@ -69,6 +69,20 @@ python scripts/run_video.py /path/to/video.mp4 \
 The default configuration writes `*_tracked.mp4` and `*_result.json`.
 Enable `save_mot_txt` in the output config for a MOTChallenge text file.
 
+### Analytics coordinates
+
+Counting lines declare `coordinate_space: pixels` or `coordinate_space:
+normalized`. Pixel coordinates remain the legacy default and are used
+unchanged. Normalized coordinates must be finite values in `[0, 1]` and are
+resolved once against the source video dimensions using the inclusive pixel
+range (`0` through `width - 1` / `height - 1`). The same resolved geometry is
+used by the counter and the overlay renderer, without mutating the loaded
+configuration or changing detector/tracker coordinates.
+
+The default line is the normalized equivalent of `[100, 540]` to
+`[1800, 540]` on a 1920×1080 reference frame. On the 768×432 sample video it
+therefore appears around `x=40..719`, `y=216`.
+
 Start the API locally:
 
 ```bash
@@ -109,6 +123,15 @@ docker compose -f docker/docker-compose.yml down
 The container uses CPU inference. Local macOS runs can use MPS when the
 detector config selects `device: auto`.
 
+The canonical Compose file is the reproducible deployment path: it mounts
+models, data and outputs, and runs the CPU API behind the local port above.
+On 2026-10-25 the workflow was also exercised in an isolated validation
+stack on port `18000` with `/health`, upload, completion, JSON/MP4 downloads,
+codec/dimension checks and visual line placement checks. The application was
+verified from a dependency-identical image while a fresh ARM64 dependency
+build was attempted; that full rebuild stalled on the 454 MB Torch download.
+The Dockerfile now enables a BuildKit pip cache mount for future rebuilds.
+
 ## Measured results
 
 Results use the pinned Ultralytics `8.4.175` runtime and TrackEval
@@ -128,6 +151,10 @@ Fine-tuning is technically valid and reproducible, but does not improve the
 MOT17 objective. See [`reports/fine_tuning_root_cause.md`](reports/fine_tuning_root_cause.md),
 [`reports/day17_final_evaluation.md`](reports/day17_final_evaluation.md), and
 [`reports/error_analysis.md`](reports/error_analysis.md).
+
+The analytics line-resolution path is independent of the fine-tuning and
+MOT17 evaluation paths; the recorded fine-tuning regression is therefore not
+explained by this analytics fix.
 
 ![Hold-out results](docs/assets/holdout_results.png)
 
@@ -179,6 +206,10 @@ ruff format --check src/tracklab evaluation scripts tests
 GitHub Actions runs the same lint, format and test checks for pushes and pull
 requests targeting `master`.
 
+The final local quality gate for this change passed with `214 passed` and one
+existing FastAPI/Starlette `httpx` deprecation warning; Ruff, formatting,
+Compose config and `git diff --check` were also clean.
+
 ## Repository guide
 
 | Path | Purpose |
@@ -200,8 +231,10 @@ requests targeting `master`.
   degradation on MOT17. It is not the default model.
 - The E5 manual count is a bounded one-sequence audit, not a general human-count
   accuracy benchmark.
-- Docker image build and `/health` smoke testing run in GitHub Actions; local
-  Docker builds still require a running Docker daemon.
+- Docker E2E was verified locally in an isolated stack on Docker Desktop. A
+  fresh full dependency rebuild can be slow on ARM64 because of the large
+  Torch wheel; the dependency-identical application validation is documented
+  in [`reports/analytics_resolution_audit.md`](reports/analytics_resolution_audit.md).
 - The FastAPI service is a local demo: authentication, quotas, durable worker
   queues and production observability are not implemented.
 

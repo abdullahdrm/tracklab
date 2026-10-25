@@ -2,8 +2,10 @@ point: foot
 
 lines:
   - id: line_1
-    p1: [100, 540]
-    p2: [1800, 540]
+    coordinate_space: normalized
+    # Equivalent to [100, 540] -> [1800, 540] on a 1920x1080 frame.
+    p1: [0.052083333333333336, 0.5]
+    p2: [0.9375, 0.5]
 
 min_track_age: 5
 cooldown_frames: 15

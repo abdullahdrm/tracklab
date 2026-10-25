@@ -205,3 +205,21 @@ Kurallar:
 - [x] `v0.1.1` etiketi oluşturuldu; aktif Git commit/etiket geçmişinden kurumsal e-posta adresi kaldırıldı.
 
 **Hafta 1 kapanış durumu:** Yerel geliştirme, test, Docker dağıtımı ve sürümleme tamamlandı. GitHub Actions, GitHub üzerindeki master commit'inde çalıştırıldı; lint, format ve test adımlarının tamamı başarılı.
+
+### Gün 21: Çözünürlükten bağımsız analytics ve Docker denetimi
+
+- [x] Çizgi koordinatları için geriye dönük uyumlu `pixels` / `normalized` alanı
+- [x] Normalize çizgilerin kaynak video boyutuna göre tek sefer çözülmesi
+- [x] Aynı çözülmüş geometrinin counter ve renderer'a geçirilmesi
+- [x] Sınır, geçersiz koordinat, yönlü geçiş ve farklı çözünürlük regresyon testleri
+- [x] Fine-tuning/MOT17 değerlendirme yolundan analytics bağımlılığı bulunmadı
+- [x] İzole port `18000` üzerinde gerçek API Docker akışı yeniden doğrulandı
+
+  `sample2.mp4`: 505 kare, 4.890 tespit, 145 track, 23 crossing; çıktı H.264,
+  768×432, 25 FPS ve 20,2 saniye. Görsel çizgi konumu `y=216` olarak doğrulandı.
+- [x] README ve denetim raporu doğrulanmış sınırlamalarla güncellendi
+
+Fresh dependency-layer Docker build was attempted but the ARM64 Torch download
+stalled; application behavior was decisively verified in a derived image from
+the existing dependency-identical image. No dependency or training run was
+changed.

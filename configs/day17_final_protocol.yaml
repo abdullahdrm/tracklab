@@ -1,0 +1,49 @@
+# Frozen before any MOT17 hold-out result was read.
+protocol_id: day17-final-v1
+split: holdout
+sequences:
+  - MOT17-02-FRCNN
+  - MOT17-10-FRCNN
+  - MOT17-13-FRCNN
+data_root: data/raw/MOT17/train
+output_root: outputs/mot17/final_holdout_day17
+variant: FRCNN
+
+detector:
+  imgsz: 960
+  confidence: 0.1
+  iou: 0.7
+  device: auto
+
+tracker:
+  # Day 16 selected the existing balanced baseline and froze it for Day 17.
+  track_high_thresh: 0.25
+  track_low_thresh: 0.1
+  new_track_thresh: 0.25
+  track_buffer: 30
+  match_thresh: 0.8
+  fuse_score: true
+
+cases:
+  - id: coco_none
+    pipeline_config: configs/pipeline.yaml
+    preprocessing: none
+    description: COCO YOLO11n baseline without preprocessing
+  - id: coco_clahe
+    pipeline_config: configs/pipeline.yaml
+    preprocessing: clahe
+    description: COCO YOLO11n with the Day 10 LAB-L CLAHE candidate
+  - id: coco_ycrcb_clahe_gamma
+    pipeline_config: configs/pipeline.yaml
+    preprocessing: ycrcb_clahe_gamma
+    description: COCO YOLO11n with the Day 10 balanced YCrCb candidate
+  - id: finetuned_none
+    pipeline_config: configs/pipeline_finetuned.yaml
+    preprocessing: none
+    description: BDD100K six-class fine-tuned checkpoint without preprocessing
+
+selection_note: >-
+  The three COCO cases are the baseline and the two previously measured Day 10
+  preprocessing candidates. The fine-tuned case is the Day 14 comparison
+  checkpoint. No case or parameter may be added, removed, or changed after the
+  first hold-out result is inspected.

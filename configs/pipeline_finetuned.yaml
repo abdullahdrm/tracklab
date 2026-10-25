@@ -1,0 +1,10 @@
+detector: detector_finetuned.yaml
+tracker: bytetrack.yaml
+preprocessing: preprocessing.yaml
+analytics: analytics.yaml
+output:
+  save_video: true
+  save_json: true
+  include_frames: true
+  save_mot_txt: false
+  quality_every_n_frames: 15

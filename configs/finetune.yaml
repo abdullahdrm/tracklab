@@ -11,4 +11,5 @@ workers: 4
 device: mps
 fraction: 1.0
 amp: false
+cls_remap: true
 patience: 10

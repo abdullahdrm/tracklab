@@ -7,6 +7,7 @@ import yaml
 
 from training.finetune import (
     CLASS_NAMES,
+    _build_training_kwargs,
     load_finetune_config,
     validate_dataset_yaml,
     validate_prerequisites,
@@ -31,6 +32,7 @@ def _valid_config() -> dict:
         "device": "mps",
         "fraction": 1.0,
         "amp": False,
+        "cls_remap": True,
         "patience": 10,
     }
 
@@ -61,6 +63,19 @@ def test_load_finetune_config_accepts_six_class_pilot_settings(tmp_path: Path) -
     assert config["device"] == "mps"
     assert config["fraction"] == 1.0
     assert config["batch"] == 4
+    assert config["cls_remap"] is True
+
+
+def test_training_kwargs_pass_explicit_class_remapping() -> None:
+    kwargs = _build_training_kwargs(
+        _valid_config(),
+        {"dataset_yaml": "/tmp/dataset.yaml"},
+        epochs=1,
+        fraction=0.01,
+        output_root=Path("outputs/training"),
+        run_name="test_run",
+    )
+    assert kwargs["cls_remap"] is True
 
 
 def test_load_finetune_config_rejects_invalid_fraction(tmp_path: Path) -> None:

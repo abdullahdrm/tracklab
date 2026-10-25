@@ -135,9 +135,9 @@ Kurallar:
 **Bitti ölçütü:** Önce/sonra tablosu.
 
 ### Gün 15: Analitik
-- [ ] `analytics/geometry.py`, `line_counter.py`, `trajectories.py`
-- [ ] `viz/draw.py` içinde sayaç ve iz çizimi
-- [ ] Birim testleri
+- [x] `analytics/geometry.py`, `line_counter.py`, `trajectories.py`
+- [x] `viz/draw.py` içinde sayaç ve iz çizimi
+- [x] Birim testleri
 
 **Bitti ölçütü:** Demo videosunda sayaç ve rotalar görünüyor.
 

@@ -1,0 +1,12 @@
+model_path: outputs/training/bdd100k_yolo11n_six_class/weights/best.pt
+imgsz: 960
+conf: 0.1
+iou: 0.7
+classes:
+- 0
+- 1
+- 2
+- 3
+- 4
+- 5
+device: auto

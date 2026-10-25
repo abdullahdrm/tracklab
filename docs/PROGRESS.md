@@ -256,3 +256,24 @@ sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
 - Birleşik HOTA: COCO=0.4351, fine-tuned=0.3316; IDF1: COCO=0.5111, fine-tuned=0.3790; IDSW: COCO=371, fine-tuned=476.
 - HOTA dört sekansın tamamında geriledi. Fine-tuned model bu MOT17 tuning deneyinde baseline'ı geçemedi.
 - Detaylı birleşik ve sekans bazlı tablo: `reports/e3_finetuned_vs_coco.md`. Hold-out sekansları kullanılmadı.
+
+## 2026-10-25: Gün 15 — Analytics ve fine-tuning karar denetimi
+
+- `src/tracklab/analytics/geometry.py`, `line_counter.py` ve `trajectories.py`
+  eklendi. Çizgi geçişleri yön bilgisiyle (`positive_to_negative` /
+  `negative_to_positive`) sayılıyor; kısa ömürlü izler ve hızlı tekrar geçişler
+  config ile filtreleniyor.
+- `viz/draw.py` sayaç çizgilerini, anlık sayaçları ve yumuşatılmış trajectory
+  izlerini çıktı videosuna ekliyor. JSON summary altında `analytics` bölümü
+  oluşturuluyor.
+- Day 15 için line-counting ve trajectory davranışını kapsayan 5 unit test eklendi. Hold-out sekanslarına erişilmedi.
+- Fine-tuning denetimi, image-label pairing veya class remapping bug'ını
+  doğrulamadı; ancak fine-tuned modelin MOT17'de dedektör seviyesinde de
+  gerilediğini doğruladı. BDD100K/MOT17 domain farkı, class imbalance ve
+  catastrophic forgetting olası açıklamalar olarak belirsizlikleriyle
+  belgelendi.
+- COCO YOLO11n varsayılan olarak korundu. Fine-tuned checkpoint yalnızca
+  `pipeline_finetuned.yaml` ile açıkça seçilebilir.
+- `training/finetune.py`, `cls_remap` ayarını artık config'ten açıkça geçiriyor;
+  böylece sonuç Ultralytics varsayılanına bağlı değil.
+- Ayrıntılı karar: `reports/fine_tuning_root_cause.md`.

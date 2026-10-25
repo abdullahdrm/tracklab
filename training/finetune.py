@@ -49,6 +49,7 @@ def load_finetune_config(path: str | Path = DEFAULT_CONFIG) -> dict[str, Any]:
         "device",
         "fraction",
         "amp",
+        "cls_remap",
         "patience",
     }
     missing = sorted(required - set(config))
@@ -84,6 +85,8 @@ def load_finetune_config(path: str | Path = DEFAULT_CONFIG) -> dict[str, Any]:
 
     if not isinstance(config["amp"], bool):
         raise TypeError("amp must be a boolean")
+    if not isinstance(config["cls_remap"], bool):
+        raise TypeError("cls_remap must be a boolean")
     device = config["device"].strip().lower()
     valid_device = device in {"auto", "mps", "cpu", "cuda"} or (
         device.startswith("cuda:") and device[5:].isdigit()
@@ -211,6 +214,7 @@ def validate_prerequisites(
         "workers": int(config["workers"]),
         "device": str(config["device"]),
         "fraction": float(config["fraction"]),
+        "cls_remap": bool(config["cls_remap"]),
     }
 
 
@@ -241,23 +245,14 @@ def run_finetuning(
 
     model = YOLO(report["model_path"])
     model.train(
-        data=report["dataset_yaml"],
-        imgsz=int(config["imgsz"]),
-        epochs=epochs,
-        batch=int(config["batch"]),
-        workers=int(config["workers"]),
-        device=str(config["device"]),
-        fraction=fraction,
-        amp=bool(config["amp"]),
-        cache=False,
-        val=True,
-        save=True,
-        plots=True,
-        patience=int(config["patience"]),
-        project=str(output_root),
-        name=run_name,
-        exist_ok=False,
-        verbose=True,
+        **_build_training_kwargs(
+            config,
+            report,
+            epochs=epochs,
+            fraction=fraction,
+            output_root=output_root,
+            run_name=run_name,
+        )
     )
     actual_output = Path(model.trainer.save_dir).resolve()
     results_path = actual_output / "results.csv"
@@ -271,6 +266,7 @@ def run_finetuning(
         "imgsz": int(config["imgsz"]),
         "epochs_requested": epochs,
         "fraction": fraction,
+        "cls_remap": bool(config["cls_remap"]),
         "device": str(config["device"]),
         "output_dir": str(actual_output),
         "results_csv_exists": results_path.is_file(),
@@ -290,6 +286,39 @@ def run_finetuning(
             "Training ended without results.csv, best.pt, or last.pt; inspect logs."
         )
     return actual_output
+
+
+def _build_training_kwargs(
+    config: Mapping[str, Any],
+    report: Mapping[str, Any],
+    *,
+    epochs: int,
+    fraction: float,
+    output_root: Path,
+    run_name: str,
+) -> dict[str, Any]:
+    """Build explicit Ultralytics arguments for reproducible training."""
+
+    return {
+        "data": report["dataset_yaml"],
+        "imgsz": int(config["imgsz"]),
+        "epochs": epochs,
+        "batch": int(config["batch"]),
+        "workers": int(config["workers"]),
+        "device": str(config["device"]),
+        "fraction": fraction,
+        "amp": bool(config["amp"]),
+        "cls_remap": bool(config["cls_remap"]),
+        "cache": False,
+        "val": True,
+        "save": True,
+        "plots": True,
+        "patience": int(config["patience"]),
+        "project": str(output_root),
+        "name": run_name,
+        "exist_ok": False,
+        "verbose": True,
+    }
 
 
 def main(argv: list[str] | None = None) -> int:

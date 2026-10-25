@@ -4,7 +4,7 @@
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-AGPL--3.0--only-blue.svg)](LICENSE)
 
-**TrackLab is a video object-detection and multi-object-tracking application built around Ultralytics YOLO and ByteTrack.** It provides a reusable Python processing pipeline, a command-line interface, and a FastAPI web service for processing videos and retrieving annotated results.
+**TrackLab is a video object-detection and multi-object-tracking application built around Ultralytics YOLO and ByteTrack.** It provides a reusable Python processing pipeline, directional line counting and trajectory analytics, a command-line interface, and a FastAPI web service for processing videos and retrieving annotated results.
 
 The current release is **v0.1.1**. Development so far has focused on building a reliable end-to-end application with configurable inference, testable components, API integration, and containerized deployment.
 
@@ -21,6 +21,7 @@ TrackLab processes a video frame by frame, detects objects, maintains track iden
 - **Frame-quality report:** Sampled brightness, contrast, sharpness, and a robust noise proxy are included under `summary.quality`; sampling frequency is configurable.
 - **Classical preprocessing:** Optional `none`, gamma, CLAHE, denoise, and chained modes can be selected; preprocessing is disabled by default.
 - **MOT export:** Optional text output in MOTChallenge-style format.
+- **Video analytics:** Directional line-crossing counts and smoothed per-track trajectories are included in the JSON summary and annotated video when configured.
 - **Web application:** Browser-based video upload and result retrieval through FastAPI.
 - **Job management:** Persistent job status and summary records backed by SQLAlchemy and SQLite.
 - **Input validation:** Checks for supported file types, upload size, video readability, and duration.
@@ -205,9 +206,24 @@ The main configuration file is `configs/pipeline.yaml`. It references component 
 | `configs/bytetrack.yaml` | ByteTrack thresholds, track buffer, and matching settings |
 | `configs/pipeline.yaml` | Component configuration references and output options |
 | `configs/preprocessing.yaml` | Select `none`, gamma, CLAHE, denoise, or a configured preprocessing chain |
-| `configs/analytics.yaml` | Configuration for planned line-counting and trajectory analytics |
+| `configs/analytics.yaml` | Line-counting and trajectory settings |
 
-**Implementation status:** The latest tagged release is v0.1.1. In the current development tree, detector, tracker, quality sampling, output settings, and configured classical preprocessing are consumed by the processing pipeline. Preprocessing defaults to `mode: none`; when enabled, it modifies only the frame passed to the tracker. Quality metrics and output visualization use the original frame. Line counting and trajectory analytics remain planned features.
+**Implementation status:** The latest tagged release is v0.1.1. In the current development tree, detector, tracker, quality sampling, output settings, configured classical preprocessing, line counting, and trajectory analytics are consumed by the processing pipeline. Preprocessing defaults to `mode: none`; when enabled, it modifies only the frame passed to the tracker. Quality metrics and output visualization use the original frame.
+
+## Fine-tuning result and default model
+
+The BDD100K six-class fine-tuning experiment completed successfully, but it
+did not improve the current MOT17 tracking objective. On the four tuning
+sequences, HOTA decreased from **0.4351** with the COCO-pretrained model to
+**0.3316** after fine-tuning; IDF1 decreased from **0.5111** to **0.3790** and
+ID switches increased from **371** to **476**. Raw detector diagnostics also
+showed lower precision and recall before ByteTrack was applied.
+
+The COCO-pretrained model therefore remains the default in
+`configs/pipeline.yaml`. The fine-tuned model is retained for comparison and
+can be selected explicitly with `configs/pipeline_finetuned.yaml`. The full
+investigation and uncertainty boundaries are documented in
+[`reports/fine_tuning_root_cause.md`](reports/fine_tuning_root_cause.md).
 
 ## MOT17 evaluation: initial tuning baseline
 
@@ -280,7 +296,7 @@ TrackLab is a local portfolio and demonstration application, not a hardened publ
 - Interrupted jobs are not automatically resumed after a process or container restart.
 - Authentication, user quotas, and production-grade observability are not implemented.
 - Initial MOT17 baseline and confidence/input-resolution selection are documented; preprocessing ablations remain pending. Hold-out sequences (02, 10, 13) are reserved for Day 17.
-- Classical preprocessing and sampled frame-quality reporting are implemented in the current development tree, but preprocessing defaults to `none`; the effect of gamma/CLAHE/denoise on tracking metrics has not yet been evaluated. Line counting and trajectory analytics are not implemented yet.
+- Classical preprocessing and sampled frame-quality reporting are implemented in the current development tree, but preprocessing defaults to `none`. Fine-tuning is retained as a documented comparison, not the default detector; hold-out evaluation remains reserved for Day 17.
 
 ## Roadmap
 
@@ -290,7 +306,7 @@ The MOT17 evaluation infrastructure, initial baseline, confidence/input-resoluti
 2. **[x] Evaluation integration:** TrackEval bridge and perfect-prediction sanity test.
 3. **[x] Baseline stabilization:** Measured `conf`/`imgsz` settings on tuning sequences and selected `conf=0.10`, `imgsz=960` as the balanced starting configuration.
 4. **[x] Preprocessing implementation:** Implement gamma correction, CLAHE, denoising, a factory, and pipeline integration with `none` as the default.
-5. **[ ] Controlled ablations:** Measure preprocessing and synthetic image degradations against the established baseline.
+5. **[x] Controlled ablations:** Measure preprocessing and synthetic image degradations against the established baseline.
 
 Only tuning sequences 04, 05, 09, and 11 have been used for the baseline and parameter sweep. Hold-out sequences 02, 10, and 13 remain reserved for the final evaluation on Day 17.
 

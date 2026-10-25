@@ -1,0 +1,13 @@
+point: foot
+
+lines:
+  - id: line_1
+    p1: [100, 900]
+    p2: [1820, 900]
+
+min_track_age: 5
+cooldown_frames: 15
+
+trajectories:
+  min_len: 10
+  smooth_window: 5

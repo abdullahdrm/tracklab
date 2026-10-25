@@ -167,8 +167,8 @@ Kurallar:
   build/health smoke test'i ayrıca raporlandı.
 
 ### Gün 19: Dokümantasyon
-- [ ] README (mimari diyagram, demo GIF, sonuç tablosu, kurulum)
-- [ ] `MODEL_CARD.md`, `DATA_LICENSES.md`
+- [x] README (mimari diyagram, demo GIF, sonuç tablosu, kurulum)
+- [x] `MODEL_CARD.md`, `DATA_LICENSES.md`
 
 ### Gün 20: Teslim
 - [ ] 60-90 sn demo videosu

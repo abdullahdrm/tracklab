@@ -324,3 +324,17 @@ sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
 - `docker compose config` başarılı. Docker CLI kurulu ancak yerel daemon socket'i
   olmadığı için yeni image build'i ve `/health` smoke test'i çalıştırılamadı;
   bu durum `reports/day18_validation.md` içinde açıkça sınır olarak yazıldı.
+
+## 2026-10-25: Gün 19 — Dokümantasyon ve görsel varlıklar
+
+- README baştan yazıldı: kurulum, API, Docker, mimari, gerçek sonuç tabloları,
+  reproducibility komutları ve sınırlamalar tek yerde toplandı.
+- `MODEL_CARD.md` eklendi; COCO/fine-tuned checkpoint provenance'ı, intended use,
+  riskler ve tuning/hold-out metrikleri belgelendi.
+- `DATA_LICENSES.md` BDD100K, MOT17, Ultralytics, TrackEval ve yerel sample
+  videoların ayrı lisans durumlarını ve dağıtım sınırlarını açıklıyor.
+- Gerçek deney çıktılarından `docs/assets/holdout_results.png`,
+  `tracker_ablation.png` ve `latency_breakdown.png`; gerçek pipeline akışından
+  `architecture.svg` üretildi. E5 için gerçek MOT17 kare denetim görseli de
+  eklendi.
+- Dokümantasyon varlık üreticisi: `scripts/generate_docs_assets.py`.

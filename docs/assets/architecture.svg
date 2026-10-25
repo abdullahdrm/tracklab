@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="820" viewBox="0 0 1600 820" role="img" aria-labelledby="title desc">
+  <title id="title">TrackLab architecture</title>
+  <desc id="desc">Browser and CLI inputs converge on the TrackLab pipeline, which reads frames, applies optional preprocessing, runs YOLO and ByteTrack, computes analytics, and writes MP4, JSON, and MOT outputs.</desc>
+  <defs>
+    <style>
+      .box { fill:#10233f; stroke:#80bfff; stroke-width:2; rx:16; }
+      .io { fill:#123d3a; stroke:#7ee2c3; stroke-width:2; rx:16; }
+      .note { fill:#2d2745; stroke:#c7a5ff; stroke-width:2; rx:16; }
+      .text { fill:#f4f7fb; font-family:Inter,Arial,sans-serif; font-size:22px; text-anchor:middle; }
+      .small { fill:#cbd7e8; font-family:Inter,Arial,sans-serif; font-size:17px; text-anchor:middle; }
+      .arrow { stroke:#9bb9d8; stroke-width:3; fill:none; marker-end:url(#arrowhead); }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#9bb9d8"/>
+    </marker>
+  </defs>
+  <rect width="1600" height="820" fill="#08111f"/>
+  <text x="800" y="48" class="text" style="font-size:30px;font-weight:700">TrackLab — end-to-end architecture</text>
+
+  <rect x="70" y="110" width="230" height="90" class="io"/>
+  <text x="185" y="150" class="text">CLI</text><text x="185" y="178" class="small">scripts/run_video.py</text>
+  <rect x="70" y="250" width="230" height="90" class="io"/>
+  <text x="185" y="290" class="text">Browser</text><text x="185" y="318" class="small">FastAPI upload UI</text>
+  <rect x="70" y="390" width="230" height="90" class="note"/>
+  <text x="185" y="430" class="text">YAML config</text><text x="185" y="458" class="small">Pydantic validation</text>
+
+  <rect x="400" y="180" width="260" height="120" class="box"/>
+  <text x="530" y="228" class="text">API / JobManager</text><text x="530" y="258" class="small">validation · SQLite · status</text>
+  <rect x="400" y="390" width="260" height="120" class="box"/>
+  <text x="530" y="438" class="text">VideoPipeline</text><text x="530" y="468" class="small">shared CLI + API path</text>
+
+  <rect x="780" y="100" width="250" height="100" class="box"/>
+  <text x="905" y="140" class="text">Frame reader</text><text x="905" y="170" class="small">OpenCV / FFmpeg</text>
+  <rect x="780" y="250" width="250" height="100" class="note"/>
+  <text x="905" y="290" class="text">Preprocessing</text><text x="905" y="320" class="small">none · gamma · CLAHE</text>
+  <rect x="780" y="400" width="250" height="100" class="box"/>
+  <text x="905" y="440" class="text">YOLO11n</text><text x="905" y="470" class="small">detector / model checkpoint</text>
+  <rect x="780" y="550" width="250" height="100" class="box"/>
+  <text x="905" y="590" class="text">ByteTrack</text><text x="905" y="620" class="small">persistent track IDs</text>
+
+  <rect x="1150" y="180" width="300" height="120" class="note"/>
+  <text x="1300" y="228" class="text">Analytics</text><text x="1300" y="258" class="small">line counts · trajectories</text>
+  <rect x="1150" y="390" width="300" height="120" class="io"/>
+  <text x="1300" y="438" class="text">Artifacts</text><text x="1300" y="468" class="small">H.264 MP4 · JSON · MOT txt</text>
+  <rect x="1150" y="600" width="300" height="90" class="io"/>
+  <text x="1300" y="640" class="text">Evaluation</text><text x="1300" y="668" class="small">TrackEval HOTA / MOTA / IDF1</text>
+
+  <path d="M300 155 H390 V240 H400" class="arrow"/>
+  <path d="M300 295 H390 V240 H400" class="arrow"/>
+  <path d="M300 435 H390 V450 H400" class="arrow"/>
+  <path d="M530 300 V380" class="arrow"/>
+  <path d="M660 450 H750 V150 H780" class="arrow"/>
+  <path d="M905 200 V240" class="arrow"/>
+  <path d="M905 350 V390" class="arrow"/>
+  <path d="M905 500 V540" class="arrow"/>
+  <path d="M1030 600 H1120 V240 H1150" class="arrow"/>
+  <path d="M1300 300 V380" class="arrow"/>
+  <path d="M1300 510 V590" class="arrow"/>
+</svg>

@@ -73,7 +73,7 @@ def create_app(
     app = FastAPI(
         title="TrackLab API",
         description="Video object tracking and analytics service",
-        version="0.1.0",
+        version="1.0.1",
         lifespan=lifespan,
     )
 

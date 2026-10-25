@@ -153,10 +153,10 @@ Kurallar:
   birleşik metriklere göre daha iyi görünse de MOT17-05'te geriledi.
 
 ### Gün 17: Final değerlendirme
-- [ ] Hold-out üzerinde final değerlendirme (bir kez)
-- [ ] **E5:** elle sayım vs sistem sayımı
-- [ ] **E6:** hız ve aşama bazlı gecikme
-- [ ] Hata analizi (`reports/error_analysis.md`)
+- [x] Hold-out üzerinde final değerlendirme (bir kez)
+- [x] **E5:** elle sayım vs sistem sayımı
+- [x] **E6:** hız ve aşama bazlı gecikme
+- [x] Hata analizi (`reports/error_analysis.md`)
 
 ### Gün 18: Test ve CI
 - [ ] Eksik testler tamamlandı

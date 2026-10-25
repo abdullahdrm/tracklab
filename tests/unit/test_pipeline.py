@@ -89,6 +89,20 @@ def test_pipeline_writes_video_json_and_mot_outputs(
     assert saved.summary["unique_tracks"] == 1
     assert saved.summary["objects_by_class_id"] == {"2": 4}
     assert all(frame.objects[0].track_id == 11 for frame in saved.frames)
+    latency = saved.summary["latency"]
+    assert latency["frame_count"] == 4
+    assert latency["total_seconds"] > 0
+    assert latency["effective_fps"] > 0
+    assert set(latency["stage_seconds"]) == {
+        "decode",
+        "quality",
+        "preprocessing",
+        "detector_tracker",
+        "analytics",
+        "draw",
+        "output_write",
+        "encode_transcode",
+    }
 
     mot_lines = run.mot_path.read_text(encoding="utf-8").splitlines()
     assert len(mot_lines) == 4

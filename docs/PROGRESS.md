@@ -295,3 +295,22 @@ sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
   geriledi. `thresholds015` de baseline'ı dengeli biçimde geçmedi.
 - Hold-out sekansları 02/10/13 bu deneyde kullanılmadı. Ayrıntılı sonuç:
   `reports/day16_tracker_ablation.md`.
+
+## 2026-10-25: Gün 17 — Final hold-out, E5 ve E6
+
+- Hold-out protokolü sonuçlardan önce `configs/day17_final_protocol.yaml` ile
+  donduruldu ve `faaeb72` commit'iyle GitHub'a gönderildi. MOT17-02/10/13 ilk
+  kez bu aşamada değerlendirildi; toplam dört koşul aynı model/tracker ayarlarıyla
+  çalıştırıldı.
+- Birleşik hold-out sonuçları: COCO+none HOTA=0.3237, COCO+CLAHE=0.3238,
+  COCO+YCrCb CLAHE→Gamma=0.3265, fine-tuned+none=0.3011. Fine-tuned koşulda
+  IDSW=667 ile COCO baseline IDSW=354'ün belirgin biçimde üzerine çıktı.
+- E5 manuel audit: MOT17-13 frame 95–140, y=900 çizgisi, sistem 1 geçiş ve
+  kare denetimi 1 geçiş; fark 0. `reports/day17_manual_count.md`.
+- E6 gerçek `sample2.mp4` pipeline koşusunda 505 kare işlendi. Toplam ölçülen
+  pipeline süresi 19.424 s, effective FPS=25.999; detector+tracker 13.644 s
+  (27.017 ms/frame), draw 3.497 s ve H.264 transcode 0.789 s. Ayrıntılı
+  aşama süreleri JSON summary içine `latency` olarak eklendi.
+- Hata analizi `reports/error_analysis.md` altında; fine-tuning'in tuning
+  ve hold-out'ta gerilemesi domain shift/calibration/track continuity
+  hipotezleriyle, kanıt sınırları korunarak belgelendi.

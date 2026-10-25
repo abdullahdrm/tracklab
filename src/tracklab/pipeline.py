@@ -1,5 +1,6 @@
 """End-to-end video processing pipeline for TrackLab."""
 
+import time
 from contextlib import ExitStack
 from dataclasses import dataclass
 from pathlib import Path
@@ -115,6 +116,17 @@ class VideoPipeline:
         objects_by_class_id: dict[str, int] = {}
         total_detections = 0
         quality_samples: list[dict[str, float | int]] = []
+        latency_seconds = {
+            "decode": 0.0,
+            "quality": 0.0,
+            "preprocessing": 0.0,
+            "detector_tracker": 0.0,
+            "analytics": 0.0,
+            "draw": 0.0,
+            "output_write": 0.0,
+            "encode_transcode": 0.0,
+        }
+        run_started = time.perf_counter()
 
         model = getattr(tracker, "model", None)
         class_names: ClassNames = getattr(model, "names", None)
@@ -123,7 +135,16 @@ class VideoPipeline:
             with ExitStack() as stack:
                 writer: FrameWriter | None = None
 
-                for frame_index, frame in read_frames(source):
+                frame_reader = iter(read_frames(source))
+                while True:
+                    decode_started = time.perf_counter()
+                    try:
+                        frame_index, frame = next(frame_reader)
+                    except StopIteration:
+                        break
+                    latency_seconds["decode"] += time.perf_counter() - decode_started
+
+                    quality_started = time.perf_counter()
                     if frame_index % self.config.output.quality_every_n_frames == 0:
                         quality_samples.append(
                             {
@@ -131,13 +152,26 @@ class VideoPipeline:
                                 **compute_frame_quality(frame),
                             }
                         )
+                    latency_seconds["quality"] += time.perf_counter() - quality_started
 
                     # Quality measures describe the original input frame;
                     # only the detector/tracker receives the transformed frame.
+                    preprocessing_started = time.perf_counter()
                     tracking_frame = preprocessor(frame)
+                    latency_seconds["preprocessing"] += (
+                        time.perf_counter() - preprocessing_started
+                    )
+                    tracker_started = time.perf_counter()
                     objects = tracker.track_frame(tracking_frame)
+                    latency_seconds["detector_tracker"] += (
+                        time.perf_counter() - tracker_started
+                    )
+                    analytics_started = time.perf_counter()
                     line_counter.update(frame_index, objects)
                     trajectory_store.update(objects)
+                    latency_seconds["analytics"] += (
+                        time.perf_counter() - analytics_started
+                    )
 
                     if raw_video_path is not None and writer is None:
                         writer = stack.enter_context(
@@ -165,6 +199,7 @@ class VideoPipeline:
                         )
 
                     if writer is not None:
+                        draw_started = time.perf_counter()
                         annotated = draw_tracks(
                             frame,
                             objects,
@@ -176,13 +211,22 @@ class VideoPipeline:
                             line_counts=line_counter.counts,
                             trajectories=trajectory_store.visible_trajectories(),
                         )
+                        latency_seconds["draw"] += time.perf_counter() - draw_started
+                        output_started = time.perf_counter()
                         writer.write(annotated)
+                        latency_seconds["output_write"] += (
+                            time.perf_counter() - output_started
+                        )
 
             if not frames:
                 raise ValueError(f"No readable frames found in video: {source}")
 
             if raw_video_path is not None and video_path is not None:
+                encode_started = time.perf_counter()
                 transcode_video_h264(raw_video_path, video_path)
+                latency_seconds["encode_transcode"] += (
+                    time.perf_counter() - encode_started
+                )
         finally:
             if raw_video_path is not None:
                 raw_video_path.unlink(missing_ok=True)
@@ -215,6 +259,23 @@ class VideoPipeline:
             ],
             "samples": quality_samples,
             "metrics": quality_summary["metrics"],
+        }
+
+        total_latency = time.perf_counter() - run_started
+        frame_count = len(frames)
+        summary["latency"] = {
+            "frame_count": frame_count,
+            "total_seconds": round(total_latency, 6),
+            "stage_seconds": {
+                name: round(seconds, 6) for name, seconds in latency_seconds.items()
+            },
+            "stage_ms_per_frame": {
+                name: round((seconds / frame_count) * 1000, 6) if frame_count else 0.0
+                for name, seconds in latency_seconds.items()
+            },
+            "effective_fps": round(frame_count / total_latency, 6)
+            if total_latency > 0
+            else 0.0,
         }
 
         result = VideoResult(

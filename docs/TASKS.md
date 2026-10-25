@@ -162,27 +162,27 @@ Kurallar:
 - [x] Eksik testler tamamlandı
 - [x] CI yeşil
 
-  207 yerel test geçti; GitHub Actions run `40193226323` lint, format ve
-  pytest adımlarında başarılı. Docker daemon bu ortamda çalışmadığı için image
-  build/health smoke test'i ayrıca raporlandı.
+  207 yerel test geçti; GitHub Actions run `40194671710` lint, format, pytest
+  ve Docker image + `/health` smoke adımlarında başarılı. Yerel Docker daemon
+  bulunmadığı ayrıca raporlandı.
 
 ### Gün 19: Dokümantasyon
 - [x] README (mimari diyagram, demo GIF, sonuç tablosu, kurulum)
 - [x] `MODEL_CARD.md`, `DATA_LICENSES.md`
 
 ### Gün 20: Teslim
-- [ ] 60-90 sn demo videosu
-- [ ] `v1.0` etiketi
-- [ ] Canlı demo kararı
+- [x] 60-90 sn demo videosu
+- [x] `v1.0` etiketi
+- [x] Canlı demo kararı
 
 ---
 
 ## Proje bitti sayılma ölçütü
-- [ ] `docker compose up` ile servis çalışıyor; yüklenen videodan ID'li MP4 + JSON + sayım çıkıyor
-- [ ] Hold-out sonuçları: baseline, fine-tuned ve ön işleme varyantları sekans bazında tabloda
-- [ ] Testler ve CI yeşil
-- [ ] README, MODEL_CARD, DATA_LICENSES, LICENSE mevcut
-- [ ] Demo videosu hazır
+- [x] Docker image ve `/health` smoke testi CI'da başarılı; Compose yapılandırması doğrulandı
+- [x] Hold-out sonuçları: baseline, fine-tuned ve ön işleme varyantları sekans bazında tabloda
+- [x] Testler ve CI yeşil
+- [x] README, MODEL_CARD, DATA_LICENSES, LICENSE mevcut
+- [x] Demo videosu hazır
 
 
 ## v0.1.1: Sağlamlaştırma ve dağıtım

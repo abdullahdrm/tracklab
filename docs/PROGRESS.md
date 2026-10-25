@@ -338,3 +338,16 @@ sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
   `architecture.svg` üretildi. E5 için gerçek MOT17 kare denetim görseli de
   eklendi.
 - Dokümantasyon varlık üreticisi: `scripts/generate_docs_assets.py`.
+
+## 2026-10-25: Gün 20 — Teslim ve sürümleme
+
+- Gerçek MOT17 pipeline çıktılarından `outputs/final_demo/tracklab_final_demo.mp4`
+  üretildi: 960×540, 25 FPS, 74.2 saniye. İlk 10 saniyelik gerçek takip
+  önizlemesi `docs/assets/demo_preview.gif` olarak README'ye bağlandı.
+- GitHub Actions run `40194671710` başarılı: 207 test, lint, format, Docker
+  image build ve konteyner `/health` smoke testi yeşil.
+- Public canlı demo açılmadı. Mevcut sürüm local Docker/API demo olarak
+  sınırlandı; kimlik doğrulama, kota, kalıcı worker kuyruğu, production
+  observability ve dağıtım/lisans kontrolleri canlı servis için hazır değil.
+- `v1.0` etiketi oluşturulup GitHub'a gönderildi. Ayrıntılar:
+  `reports/day20_delivery.md`.

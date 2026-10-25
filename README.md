@@ -200,8 +200,8 @@ requests targeting `master`.
   degradation on MOT17. It is not the default model.
 - The E5 manual count is a bounded one-sequence audit, not a general human-count
   accuracy benchmark.
-- Docker build verification requires a running Docker daemon; CI does not build
-  the image in the current workflow.
+- Docker image build and `/health` smoke testing run in GitHub Actions; local
+  Docker builds still require a running Docker daemon.
 - The FastAPI service is a local demo: authentication, quotas, durable worker
   queues and production observability are not implemented.
 

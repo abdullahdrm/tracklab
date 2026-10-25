@@ -20,7 +20,9 @@ testi bu pakete dahildir.
 
 Master üzerinde `ace67c5` için GitHub Actions CI run `40193226323` başarıyla
 tamamlandı. `Install FFmpeg`, bağımlılık kurulumu, Ruff lint, format ve pytest
-adımlarının tamamı yeşil.
+adımlarının tamamı yeşil. Docker smoke job'ı eklendikten sonra master üzerindeki
+`b958569` için `40194671710` run'ı da test ve Docker job'larıyla başarıyla
+tamamlandı.
 
 GitHub runner iki bilgilendirme annotation'ı üretti: bazı action'lar Node.js 20
 hedefliyor ve `ubuntu-latest` Ubuntu 26'ya taşınacak. Bunlar proje test
@@ -31,11 +33,12 @@ başarısızlığı değil, geleceğe dönük runner uyarılarıdır.
 - `docker compose -f docker/docker-compose.yml config` başarılı; servis, port,
   volume, environment ve healthcheck tanımları çözümlendi.
 - Yerel Docker CLI/Compose kurulu olsa da bu çalışma ortamında Docker daemon
-  socket'i (`~/.docker/run/docker.sock`) mevcut değildi. Bu nedenle yeni image
-  build'i ve geçici `/health` smoke test'i bu makinede çalıştırılamadı.
-- Projenin `v0.1.1` imajı ve Compose health kontrolü önceki doğrulama kaydında
-  mevcut; bu committeki pipeline değişikliği Dockerfile bağımlılıklarına yeni
-  bir paket eklemiyor.
+  socket'i (`~/.docker/run/docker.sock`) mevcut değildi; bu nedenle yerel
+  image build'i çalıştırılamadı.
+- GitHub Actions `40194671710` Docker job'ı `docker/Dockerfile` ile image'ı
+  oluşturdu ve konteynerde `/health` endpoint'ini doğruladı. Build context'i
+  `.dockerignore` ile yerel veri/model/çıktılardan ayrıştırıldı; startup için
+  smoke curl komutuna retry eklendi.
 
-Bu nedenle Gün 18'in test/CI kabul ölçütü tamamlandı; Docker build durumu
-ortam-daemon engeli olarak saklandı ve başarı iddiası yapılmadı.
+Bu nedenle Gün 18'in test/CI ve Docker image smoke kabul ölçütü tamamlandı;
+yalnızca bu makinede yerel daemon bulunmadığı ayrıca belirtilmiştir.

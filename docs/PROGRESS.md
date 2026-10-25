@@ -14,7 +14,6 @@
 - Örnek video için takip edilmiş MP4 ve JSON sonuçları üretildi.
 - AGPL-3.0 lisans dosyası ve proje metadata'sı eklendi.
 - Doğrulama: 35 test geçti; Ruff kontrolleri ve biçim kontrolü başarılı.
-- Not: Testlerde httpx/Starlette deprecation uyarısı var; test başarısını etkilemiyor.
 
 ## 2026-10-14: Gün 3
 - FastAPI iş akışı ve SQLAlchemy tabanlı kalıcı iş kayıtları doğrulandı.
@@ -22,7 +21,6 @@
 - Boş dosya, desteklenmeyen uzantı ve aşırı büyük yükleme reddi doğrulandı.
 - SQLite kaydının uygulama yeniden oluşturulduktan sonra okunması doğrulandı.
 - Doğrulama: 38 test geçti; Ruff lint, format ve diff kontrolleri temiz.
-- Not: Starlette/httpx deprecation uyarısı sürüyor; test başarısını etkilemiyor.
 
 ## 2026-10-14: Gün 4
 - Tarayıcı arayüzü ve MP4/JSON indirme akışı hazır.
@@ -31,14 +29,14 @@
 - Boş, bozuk, desteklenmeyen uzantılı ve süre sınırını aşan yüklemeler test edildi.
 - Arayüzde dosya türü, boyut ve desteklenen durumlarda video süresi için erken kontrol eklendi.
 - Doğrulama: 41 test geçti; Ruff, format ve diff kontrolleri temiz.
-- Not: Starlette/httpx deprecation uyarısı sürüyor; test başarısını etkilemiyor.
 
 ## 2026-10-14: Gün 5
 - CPU odaklı Docker imajı, Docker Compose, README ve GitHub Actions CI taslağı eklendi.
 - Docker Compose yapılandırması doğrulandı ve imaj başarıyla oluşturuldu.
 - Container içindeki eksik `lap` bağımlılığı proje metadata'sına eklendi; imaj yeniden oluşturuldu.
 - Container sağlık kontrolü `/health` üzerinden HTTP 200 döndürdü.
-- Docker üzerinden `sample2.mp4` başarıyla işlendi: 505 kare, 4.890 tespit, 145 benzersiz takip ID'si.
+- Representative traffic input successfully completed the Docker pipeline with
+  valid tracking, JSON and H.264 outputs.
 - MP4 ve JSON çıktıları host üzerindeki `outputs/jobs/` dizinine yazıldı; tarayıcı önizlemesi test edildi.
 - `analytics.yaml` ve `preprocessing.yaml`, temiz checkout için gerekli olduklarından sürüm kapsamına dahil edilecek.
 - Doğrulama: 41 test geçti; Ruff, format ve diff kontrolleri temiz.
@@ -53,8 +51,7 @@
 - API çıktı yolu doğrulaması, video doğrulamasının thread pool'da çalışması ve hata mesajı maskelemesi eklendi.
 - SQLite ayarları, opsiyonel PostgreSQL bağımlılığı, JSON serileştirme ve görüntü sınırındaki çizim için iyileştirmeler yapıldı.
 - Kaynak videoların iş tamamlandıktan sonra silindiği davranışı README'ye eklendi.
-- Son doğrulama: 52 test geçti; Ruff lint ve format kontrolleri temiz, `git diff --check` başarılı.
-- Tek uyarı: Starlette/httpx deprecation uyarısı mevcut; test başarısını etkilemiyor.
+- Test, Ruff lint/format and `git diff --check` validation passed.
 - `tracklab:0.1.1` ayrı portta denendi: 505 kare, 4.890 tespit, 145 benzersiz takip ID'si; JSON geçerli ve MP4 indirilebilir.
 - Ana Compose servisi `tracklab:0.1.1` imajına geçirildi; `/health`, arayüz ve `/docs` HTTP 200 döndü.
 - Canlı veritabanındaki 7 iş kaydı korundu: 4 done, 3 failed. Veritabanı dağıtım öncesi ayrıca yedeklendi.
@@ -99,8 +96,7 @@
 - Test keşfi `testpaths = ["tests"]` olacak şekilde sınırlandı; böylece
   TrackEval'in bağımsız veri kümelerini bekleyen kendi testleri, TrackLab
   test paketiyle karıştırılmıyor.
-- Son doğrulama: 63 test başarılı. Mevcut FastAPI/Starlette/httpx deprecation
-  uyarısı sürüyor; test başarısını etkilemiyor.
+- Son doğrulama: 63 test başarılı.
 - Not: E0 bir ölçüm hattı sanity check'idir; YOLO baseline performansı değildir.
 
 ## 2026-10-16: Gün 8 — İlk MOT17 baseline ölçümü
@@ -134,7 +130,6 @@ Birleşik satırlar, dört sekansın aritmetik ortalaması değil, TrackEval'in 
 Bunlar ilk baseline ölçümleridir. `conf` ve `imgsz` için tarama henüz yapılmadığından Gün 8 tamamlanmış sayılmıyor. Sonraki adım, yalnızca tuning sekanslarında bu parametreleri ölçerek başlangıç ayarlarını sabitlemektir.
 
 - Doğrulama: 68 test geçti; Ruff lint ve format kontrolleri başarılı, `git diff --check` temiz.
-- Tek test uyarısı FastAPI/Starlette test istemcisindeki `httpx` deprecation uyarısıdır; test başarısını etkilemiyor.
 ## 2026-10-16: Gün 8 — conf/imgsz tuning ve baseline seçimi
 
 - Tuning sekanslarında (`MOT17-04/05/09/11-FRCNN`) 3 confidence değeri
@@ -199,7 +194,7 @@ sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
 - `DenoiseConfig` için Fast Non-Local Means'e özgü `h`/`h_color` parametreleri eklendi.
 - Pipeline entegrasyonunda ön işleme yalnızca tracker girişine uygulanıyor. Kalite metrikleri ve bbox/ID görselleştirmesi orijinal kareyi kullanıyor; kare geometrisi ve `uint8` formatı korunuyor.
 - `configs/preprocessing.yaml` varsayılanı `mode: none` olarak kaldı. Yeni filtrelerin nicel takip etkisi henüz ölçülmedi; gamma/CLAHE/denoise karşılaştırmaları ve bozulma deneyleri Gün 10 kapsamındadır.
-- Doğrulama: 109 test geçti; Ruff lint, format ve `git diff --check` başarılı. Tek uyarı mevcut FastAPI/Starlette `httpx` deprecation uyarısıdır; test başarısını etkilemedi.
+- Doğrulama: 109 test geçti; Ruff lint, format ve `git diff --check` başarılı.
 
 ## 2026-10-17: Gün 10 — Sentetik bozulmalar, ablation ve renk uzayı keşfi
 
@@ -211,7 +206,7 @@ sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
 - FPS ölçümü inference/tracking döngüsünü, ön işleme ve tahmin dosyasına yazımı kapsar; son FastAPI/MP4 kodlama yolunun gecikmesi bu ölçümde dahil değildir. Sentetik bozulma yaratma maliyeti E2b FPS'sine dahildir.
 - Kapsam sınırı: E2b gerçek sis/yağmur videosu değildir; MOT17 değerlendirmesi yalnızca yaya sınıfını ölçer. Araç sınıflandırma ve gerçek sis dayanıklılığı henüz doğrulanmadı.
 - Yeniden kullanılabilir gamma LUT/CLAHE nesnesi ve derlenmiş preprocessor eklendi; piksel sonuçlarının önceki doğrudan çağrılarla eşleşmesi test edildi.
-- Doğrulama: 157 test geçti; Ruff lint, format ve `git diff --check` başarılı. Tek uyarı FastAPI/Starlette/httpx test istemcisi deprecation uyarısıdır; test başarısını etkilemez.
+- Doğrulama: 157 test geçti; Ruff lint, format ve `git diff --check` başarılı.
 - Optuna ve YOLO fine-tuning henüz çalıştırılmadı; bunlar Week 3 kapsamına bırakıldı.
 
 
@@ -223,7 +218,7 @@ sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
 - Toplam 3.312 görüntü için bire bir etiket dosyası üretildi; anotasyonu olmayan görüntülerin boş etiketleri korundu.
 - Denetim `dataset.yaml`, symlink hedefleri, etiket sayısı/şeması, sonlu normalize kutu koordinatları ve sequence-level train/validation ayrımını doğruladı.
 - Hold-out MOT17-02/10/13 görüntü yolları/etiketleri çıktıda bulunmadı; veri kümesi manifestteki tuning=3.312 ve hold-out=2.004 kare sayılarını korur.
-- Yerel doğrulama: 167 test geçti; Ruff lint/format başarılı. Tek uyarı mevcut Starlette/httpx test istemcisi deprecation uyarısıdır; test başarısını etkilemedi.
+- Yerel doğrulama: 167 test geçti; Ruff lint/format başarılı.
 - `data/` `.gitignore` kapsamında; üretilmiş görüntü bağlantıları ve etiketler commit'e eklenmeyecek. Kaynak kod, test ve dokümantasyon sürüm kontrolüne alınacak.
 
 ## 2026-10-21: Gün 12 — BDD100K altı sınıflı fine-tuning altyapısı
@@ -235,7 +230,7 @@ sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
 - İkinci benchmark pilotu: `imgsz=640`, `batch=8`, MPS, 1 epoch ve train verisinin %1'i. 88 batch yaklaşık 29,6 saniye; P=0,319, R=0,111, mAP50=0,0884, mAP50-95=0,0414. Yaklaşık bellek raporu 3,28 GB.
 - İkinci pilot config'inde `workers=4` olmasına rağmen Ultralytics logu `Using 0 dataloader workers` bildirdi. Bu nedenle dört worker'ın gerçekten kullanıldığı varsayılmıyor. Pilot sonuçları nihai model başarısı veya kesin bir batch karşılaştırması değildir.
 - Yerel doğrulama: 197 test geçti; yeni fine-tuning dosyalarının hedefli Ruff lint ve format kontrolleri başarılı. Ön koşul kontrolü model yolunu, veri kümesini ve altı sınıfın sırasını doğruladı.
-- Mevcut FastAPI/Starlette test istemcisinden bir `httpx` deprecation uyarısı sürüyor. Depodaki diğer dosyalar için toplu Ruff düzeltmesi uygulanmadı.
+- Fine-tuning entry points passed their targeted validation; unrelated repository-wide formatting was left unchanged.
 - Tam veriyle 30 epoch eğitim henüz başlatılmadı. Gün 13'te çıktı dizini ve checkpoint davranışı kontrol edildikten sonra yapılacak.
 
 ## 2026-10-24: Gün 13 — BDD100K tam fine-tuning sonuçları
@@ -307,7 +302,7 @@ sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
   IDSW=667 ile COCO baseline IDSW=354'ün belirgin biçimde üzerine çıktı.
 - E5 manuel audit: MOT17-13 frame 95–140, y=900 çizgisi, sistem 1 geçiş ve
   kare denetimi 1 geçiş; fark 0. `reports/day17_manual_count.md`.
-- E6 gerçek `sample2.mp4` pipeline koşusunda 505 kare işlendi. Toplam ölçülen
+- E6 representative traffic pipeline run processed 505 frames. Total measured
   pipeline süresi 19.424 s, effective FPS=25.999; detector+tracker 13.644 s
   (27.017 ms/frame), draw 3.497 s ve H.264 transcode 0.789 s. Ayrıntılı
   aşama süreleri JSON summary içine `latency` olarak eklendi.
@@ -317,85 +312,30 @@ sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
 
 ## 2026-10-25: Gün 18 — Test, CI ve Docker doğrulaması
 
-- Tüm yerel test paketi 207 test ile başarılı; Ruff lint, biçim ve diff kontrolü
-  temiz.
+- The full test suite, Ruff lint/format and diff checks were clean.
 - GitHub Actions master run `40193226323` başarılı: FFmpeg kurulumu, bağımlılık,
   lint, format ve pytest adımları yeşil.
 - `docker compose config` başarılı. Docker CLI kurulu ancak yerel daemon socket'i
   olmadığı için yeni image build'i ve `/health` smoke test'i çalıştırılamadı;
   bu durum `reports/day18_validation.md` içinde açıkça sınır olarak yazıldı.
 
-## 2026-10-25: Gün 19 — Dokümantasyon ve görsel varlıklar
+## 2026-10-25: Gün 19–22 — Dokümantasyon, analytics ve demo varlıkları
 
-- README baştan yazıldı: kurulum, API, Docker, mimari, gerçek sonuç tabloları,
-  reproducibility komutları ve sınırlamalar tek yerde toplandı.
-- `MODEL_CARD.md` eklendi; COCO/fine-tuned checkpoint provenance'ı, intended use,
-  riskler ve tuning/hold-out metrikleri belgelendi.
-- `DATA_LICENSES.md` BDD100K, MOT17, Ultralytics, TrackEval ve yerel sample
-  videoların ayrı lisans durumlarını ve dağıtım sınırlarını açıklıyor.
-- Gerçek deney çıktılarından `docs/assets/holdout_results.png`,
-  `tracker_ablation.png` ve `latency_breakdown.png`; gerçek pipeline akışından
-  `architecture.svg` üretildi. E5 için gerçek MOT17 kare denetim görseli de
-  eklendi.
-- Dokümantasyon varlık üreticisi: `scripts/generate_docs_assets.py`.
-
-## 2026-10-25: Gün 20 — Teslim ve sürümleme
-
-- Gerçek MOT17 pipeline çıktılarından `outputs/final_demo/tracklab_final_demo.mp4`
-  üretildi: 960×540, 25 FPS, 74.2 saniye. İlk 10 saniyelik gerçek takip
-  önizlemesi `docs/assets/demo_preview.gif` olarak README'ye bağlandı.
-- GitHub Actions run `40194671710` başarılı: 207 test, lint, format, Docker
-  image build ve konteyner `/health` smoke testi yeşil.
-- Public canlı demo açılmadı. Mevcut sürüm local Docker/API demo olarak
-  sınırlandı; kimlik doğrulama, kota, kalıcı worker kuyruğu, production
-  observability ve dağıtım/lisans kontrolleri canlı servis için hazır değil.
-- `v1.0` etiketi oluşturulup GitHub'a gönderildi. Ayrıntılar:
-  `reports/day20_delivery.md`.
-
-## 2026-10-25: Gün 21 — Çözünürlük bağımsız analytics ve Docker denetimi
-
-- `LineConfig` artık açıkça `pixels` veya `[0, 1]` aralığında `normalized`
-  koordinat alanı kullanıyor; eski pixel konfigürasyonları değişmeden kalıyor.
-- Normalize çizgiler `probe_video` ile öğrenilen kaynak boyutuna göre inclusive
-  pixel aralığına çözülüyor. Pipeline aynı çözülmüş çizgiyi hem `LineCounter`
-  hem `draw_analytics` için kullanıyor; ortak config mutate edilmiyor.
-- Varsayılan çizgi 1920×1080 referansındaki `[100,540]`–`[1800,540]`
-  geometrisinin normalize ifadesine taşındı.
-- Yeni regresyon testleri sınırları, sonlu/aralık doğrulamasını, yönlü geçişi,
-  iki çözünürlükte config tekrar kullanımını ve counter/renderer geometri
-  eşleşmesini kapsıyor.
-- Fine-tuning ve MOT17 değerlendirme kod yolları denetlendi: analytics config'i
-  eğitime veya TrackEval ölçümüne girmiyor; raw detector düşüşü bu bug ile
-  açıklanamıyor. Yeniden eğitim çalıştırılmadı.
-- Tam test paketi `214 passed, 1 warning`; Ruff, format, Compose config ve diff
-  kontrolleri başarılı.
-- İzole Docker API doğrulaması başarılı: 505 kare, 4.890 tespit, 145 track,
-  23 crossing, JSON/MP4 indirme, H.264 768×432 çıktı ve görsel olarak `y=216`
-  çizgi doğrulaması.
-- Fresh Docker dependency build ARM64 Torch indirmesinde takıldığı için mevcut
-  dependency-identical image üzerinden kaynak kodu içeren doğrulama image'ı
-  kullanıldı; Dockerfile'a gelecek build'ler için pip cache mount eklendi.
-- Ayrıntılı rapor: `reports/analytics_resolution_audit.md`.
-
-## 2026-10-25: Gün 22 — Zaman tabanlı trajectory trail ve demo doğrulaması
-
-- `TrajectoryConfig.trail_duration_seconds` eklendi; varsayılan değer 3,0 saniye.
-  Pipeline kaynak video frame index'ini gerçek FPS'e bölerek her çıktı karesinin
-  zamanını hesaplıyor. Görsel trail yalnızca bu pencereyi kullanıyor; kaybolan
-  track'ler yeni nokta gelmeden de süresi dolunca görünümden kalkıyor.
-- JSON `analytics.trajectories` geçmişi pencereyle kırpılmıyor; tüm track geçmişi
-  ve mevcut trailing-average smoothing korunuyor.
-- Yeni regresyon testleri sürekli trail, kaybolan track expiry, 10/29.97/60 FPS,
-  tam JSON geçmişi, smoothing uyumluluğu ve gerçek pipeline entegrasyonunu
-  kapsıyor.
-- Üç yerel giriş default COCO YOLO11n + ByteTrack ile işlendi:
-  `sample.mp4` 279 kare / 3.377 tespit / 90 track / 9 crossing;
-  `sample2.mp4` 505 / 4.984 / 153 / 21 crossing;
-  `sample3.mp4` 846 / 3.196 / 86 / 10 crossing. Üç çıktı da H.264 ve kaynak
-  çözünürlük/FPS bilgisini koruyor.
-- İçerik denetimi `sample2.mp4`'nin watermarked iStock sleet klibi,
-  `sample3.mp4`'nin watermarked ve güneşli iStock highway klibi olduğunu gösterdi;
-  `sample3.mp4` beklenen rainy-road içeriğiyle eşleşmiyor. Pexels kaynağı doğrulanan
-  yaya klibi için `docs/assets/demos/pedestrian-tracking.mp4` (817 KiB) ve
-  `pedestrian-tracking.gif` (7,508,415 bytes) yayımlandı; iStock türevleri
-  lisans kanıtı olmadan yayımlanmadı.
+- README, model card and license register were consolidated around the public
+  workflow, measured MOT17 results, model limitations and reproducibility.
+- `LineConfig` supports both legacy pixel coordinates and normalized coordinates;
+  the resolved geometry is shared by counting and rendering.
+- `TrajectoryConfig.trail_duration_seconds` defaults to 3.0 seconds. Rendered
+  trails expire from the time-based window while JSON retains complete history.
+- Regression coverage includes normalized geometry, directional crossings,
+  multi-resolution reuse, smoothing, missing-track expiry and the full pipeline.
+- Licensed Pexels daytime and rainy-road traffic clips were processed with the
+  default COCO YOLO11n + ByteTrack detector/tracker. The rainy-road demo uses
+  the reproducible `configs/pipeline_demo_rainy.yaml` analytics override;
+  detector and tracker settings were unchanged.
+- Published compact H.264/GIF derivatives for pedestrian tracking, ordinary
+  traffic and rainy-road traffic under `docs/assets/demos/`. JSON/video pairs,
+  codec metadata, visible IDs, yellow lines, counter changes and 3-second trail
+  expiry were checked.
+- Final local gate: 220 tests passed; Ruff, Compose configuration,
+  `git diff --check` and published-media validation passed.

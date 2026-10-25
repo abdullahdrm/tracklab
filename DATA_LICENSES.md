@@ -57,37 +57,52 @@ applicable third-party terms.
   CLEAR/MOTA and Identity/IDF1 calculations; its license remains separate from
   TrackLab's AGPL-3.0-only license.
 
-## Local sample videos
+## Published demo media
 
-- `data/sample.mp4` is a pedestrian street clip. macOS download metadata records
-  the Pexels CDN URL for video `10531835`; the corresponding provider page is
-  [Pexels video 10531835](https://www.pexels.com/video/10531835/). The
-  [Pexels license](https://www.pexels.com/license/) permits free use and
-  modification, including commercial use, without required attribution. It
-  does prohibit redistributing the unmodified asset on another stock platform
-  and does not grant rights to depicted third-party marks or people. The
-  annotated, edited preview in `docs/assets/demos/` is therefore published as
-  a project demonstration; no Pexels attribution is required. The exact
-  uploader name was not recoverable from the local metadata.
-- `data/sample2.mp4` is not a normal-weather traffic clip. Its download
-  metadata identifies iStock/Getty item `1209071519`, [Motorway traffic
-  driving in hazardous sleet](https://www.istockphoto.com/video/motorway-traffic-driving-in-hazardous-sleet-gm1209071519-349602656).
-  The local file is a watermarked preview. The [iStock Content License
-  Agreement](https://www.istockphoto.com/legal/license-agreement) permits use
-  only under an applicable purchased license and expressly limits watermarked
-  content to test/sample-layout use; it cannot be used in publicly available
-  final materials. No purchase or redistribution permission is documented, so
-  neither the source nor an annotated derivative is committed.
-- The provided `sample3.mp4` is also identified from download metadata as an
-  iStock/Getty item, `1251770963`, [Trucks and cars on a
-  highway](https://www.istockphoto.com/tr/video/kamyonlar-ve-arabalar-y%C3%BCksek-yolda-gm1251770963-365061926).
-  Visual inspection shows a sunny highway, not rainy-road traffic, and the
-  file carries an iStock watermark. The same iStock terms apply; no purchase,
-  attribution instruction, or public redistribution permission is documented.
-  It remains local-only and is not committed.
-- All three files are local sample inputs and remain ignored by Git. The three
-  clips were processed for validation on 2026-10-25, but only the Pexels-based
-  pedestrian derivative was eligible for publication on the evidence above.
+The repository distributes edited, annotated derivatives only. The original
+stock downloads are not included.
+
+### Pedestrian tracking
+
+- Source page: [Pexels video 10531835](https://www.pexels.com/video/10531835/).
+- Terms: [Pexels license](https://www.pexels.com/legal-pages/license/).
+- The license permits free use and modification, including commercial use, and
+  does not require attribution. It prohibits selling unaltered copies or
+  redistributing the unmodified asset on another stock platform.
+- Published derivatives: `docs/assets/demos/pedestrian-tracking.gif` and
+  `docs/assets/demos/pedestrian-tracking.mp4`.
+
+### Ordinary road traffic
+
+- Source page: [Vehicles Driving on Road During Daytime — Pexels video
+  4887833](https://www.pexels.com/video/vehicles-driving-on-road-during-daytime-4887833/).
+- Download route used: [Pexels supported download endpoint](https://www.pexels.com/download/video/4887833/).
+- Uploader shown on the source page: Sapol Churanon.
+- Terms: [Pexels license](https://www.pexels.com/legal-pages/license/).
+- Page metadata: 3840×2160, 60 FPS, 0:06. Measured downloaded stream: H.264,
+  3840×2160, 30 FPS, 5.65 seconds, 169 frames.
+- Suitability check: bright multi-lane urban traffic with clear vehicle motion;
+  the default pipeline produced visible IDs and one observed line crossing.
+- Published derivatives: `docs/assets/demos/traffic-daytime.gif` and
+  `docs/assets/demos/traffic-daytime.mp4`.
+- Pexels does not require attribution; the source page and uploader are listed
+  here for provenance.
+
+### Rainy-road traffic
+
+- Source page: [Night Highway Traffic on Rainy Road — Pexels video
+  40346582](https://www.pexels.com/video/night-highway-traffic-on-rainy-road-40346582/).
+- Download route used: [Pexels supported download endpoint](https://www.pexels.com/download/video/40346582/).
+- Uploader shown on the source page: Harshal .
+- Terms: [Pexels license](https://www.pexels.com/legal-pages/license/).
+- Page metadata and measured downloaded stream: H.264, 1920×1080, 25 FPS,
+  13 seconds, 325 frames.
+- Suitability check: vehicles are visibly moving on a wet nighttime highway;
+  the rainy-road analytics line produced one observed truck crossing.
+- Published derivatives: `docs/assets/demos/traffic-rainy-road.gif` and
+  `docs/assets/demos/traffic-rainy-road.mp4`.
+- Pexels does not require attribution; the source page and uploader are listed
+  here for provenance.
 
 ## Project source
 

@@ -92,6 +92,6 @@ the final comparison is in
 ## Licensing
 
 TrackLab source is AGPL-3.0-only. The detector code/model, BDD100K, MOT17,
-TrackEval and local sample videos have separate terms; see
+TrackEval and published demo media have separate terms; see
 [`DATA_LICENSES.md`](DATA_LICENSES.md). This card does not grant rights to
 redistribute weights or dataset files.

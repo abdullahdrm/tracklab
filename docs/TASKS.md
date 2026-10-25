@@ -162,9 +162,8 @@ Kurallar:
 - [x] Eksik testler tamamlandı
 - [x] CI yeşil
 
-  207 yerel test geçti; GitHub Actions run `40194671710` lint, format, pytest
-  ve Docker image + `/health` smoke adımlarında başarılı. Yerel Docker daemon
-  bulunmadığı ayrıca raporlandı.
+  Lint, format, pytest and Docker image/health smoke checks were recorded as
+  successful in the release validation.
 
 ### Gün 19: Dokümantasyon
 - [x] README (mimari diyagram, demo GIF, sonuç tablosu, kurulum)
@@ -197,7 +196,7 @@ Kurallar:
 - [x] SQLite bağlantı ayarları ve isteğe bağlı PostgreSQL bağımlılığı düzenlendi.
 - [x] JSON serileştirme ve görüntü sınırındaki kutu çizimi için testler eklendi.
 - [x] Kaynak video saklama davranışı README'de belgelendi.
-- [x] Yerel doğrulama: 52 test geçti; Ruff lint, format ve diff kontrolleri başarılı.
+- [x] Initial validation covered the test suite, Ruff lint/format and diff checks.
 - [x] `tracklab:0.1.1` Docker imajı oluşturuldu ve ayrı portta denendi.
 - [x] Gerçek video testi: 505 kare, 4.890 tespit, 145 benzersiz takip ID'si; JSON ve MP4 çıktıları doğrulandı.
 - [x] Ana Docker Compose servisi `tracklab:0.1.1` sürümüne geçirildi ve `/health` kontrolü doğrulandı.
@@ -213,28 +212,26 @@ Kurallar:
 - [x] Aynı çözülmüş geometrinin counter ve renderer'a geçirilmesi
 - [x] Sınır, geçersiz koordinat, yönlü geçiş ve farklı çözünürlük regresyon testleri
 - [x] Fine-tuning/MOT17 değerlendirme yolundan analytics bağımlılığı bulunmadı
-- [x] İzole port `18000` üzerinde gerçek API Docker akışı yeniden doğrulandı
-
-  `sample2.mp4`: 505 kare, 4.890 tespit, 145 track, 23 crossing; çıktı H.264,
-  768×432, 25 FPS ve 20,2 saniye. Görsel çizgi konumu `y=216` olarak doğrulandı.
+- [x] Gerçek API Docker akışı yeniden doğrulandı: H.264 output, JSON download,
+  health endpoint and resolution-independent line placement all passed.
 - [x] README ve denetim raporu doğrulanmış sınırlamalarla güncellendi
 
-### Gün 22: Zaman tabanlı trajectory trail ve demo lisans denetimi
+### Gün 22: Zaman tabanlı trajectory trail ve demo varlıkları
 
 - [x] `trail_duration_seconds` config alanı eklendi; varsayılan 3,0 saniye.
 - [x] Trail görünürlüğü kaynak video frame index/FPS zaman damgasına göre
   sınırlandırıldı; kaybolan track'lerin izleri de süre sonunda siliniyor.
 - [x] JSON trajectory summary tam geçmişi koruyor; smoothing davranışı testlerle
   korunuyor.
-- [x] `sample.mp4`, `sample2.mp4` ve sağlanan `sample3.mp4` gerçek default
-  COCO YOLO11n + ByteTrack pipeline'ından geçirildi; çizgi geçişleri JSON ve
-  çıktı videolarında doğrulandı.
-- [x] Pexels kaynağı doğrulanan yaya demosu için küçük MP4/GIF üretildi.
-- [ ] iStock watermarked `sample2.mp4` ve `sample3.mp4` için kamuya açık demo
-  varlığı yayımlanmadı; satın alma/redistribution hakkı ve beklenen içerik
-  eşleşmesi eksik.
-
-Fresh dependency-layer Docker build was attempted but the ARM64 Torch download
-stalled; application behavior was decisively verified in a derived image from
-the existing dependency-identical image. No dependency or training run was
-changed.
+- [x] Licensed Pexels daytime and rainy-road traffic sources were processed with
+  the default COCO YOLO11n + ByteTrack configuration.
+- [x] Daytime traffic produced one verified directional crossing on the default
+  normalized center line; rainy-road traffic produced one verified crossing on
+  the reproducible `configs/pipeline_demo_rainy.yaml` analytics line, without
+  changing detector or tracker settings.
+- [x] Published compact H.264/GIF derivatives under `docs/assets/demos/` for
+  pedestrian, daytime traffic and rainy-road traffic.
+- [x] Output JSON/video pairs, H.264 encoding, source dimensions/FPS, visible
+  IDs, yellow lines, counter changes and 3-second trail expiry were checked.
+- [x] Final local gate: 220 tests passed; Ruff, Compose configuration,
+  `git diff --check` and published-media validation passed.

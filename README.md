@@ -13,38 +13,44 @@ The default detector is the COCO-pretrained YOLO11n checkpoint. The BDD100K
 fine-tuned checkpoint is retained as an explicit comparison because it reduced
 MOT17 tracking performance.
 
-![TrackLab demo preview](docs/assets/demo_preview.gif)
-
-The full locally generated demo is 74.2 seconds at 960×540:
-`outputs/final_demo/tracklab_final_demo.mp4`. It is not committed because its
-source clips are local data with separate licensing terms.
+![TrackLab pedestrian tracking demo](docs/assets/demos/pedestrian-tracking.gif)
 
 ## Verified demos
 
-The repository includes one compact, redistributable preview. The other two
-local clips were processed and visually verified, but their watermarked iStock
-previews cannot be published under the available evidence; see
-[`DATA_LICENSES.md`](DATA_LICENSES.md).
+Each preview is a compact annotated derivative with detector boxes, track IDs,
+the yellow counting line, directional counters and time-bounded trajectory
+trails. The corresponding H.264 MP4 is linked below each preview.
 
 ### Pedestrian tracking
 
 ![Pedestrian tracking demo](docs/assets/demos/pedestrian-tracking.gif)
 
-[Download the H.264 MP4 preview](docs/assets/demos/pedestrian-tracking.mp4)
+[Download the annotated H.264 MP4](docs/assets/demos/pedestrian-tracking.mp4)
 
-Source: `data/sample.mp4`, identified from local download metadata as Pexels
-video 10531835. The 6-second preview includes detector boxes, track IDs,
-smoothed trails, the yellow counting line and visible directional counter
-changes.
+The preview shows pedestrian tracking, temporary IDs, line-crossing counts and
+3-second smoothed trails.
 
-### Normal road traffic and rainy-road traffic
+### Ordinary road traffic
 
-Both requested traffic clips were processed locally with the default COCO
-YOLO11n + ByteTrack pipeline and produced valid annotated H.264 outputs with
-directional crossings. The provided `data/sample2.mp4` is actually a
-watermarked rainy/sleet motorway clip, while the provided `sample3.mp4` is a
-watermarked sunny highway clip rather than rainy-road footage. Neither is
-published in this repository until redistribution rights are documented.
+![Ordinary traffic demo](docs/assets/demos/traffic-daytime.gif)
+
+[Download the annotated H.264 MP4](docs/assets/demos/traffic-daytime.mp4)
+
+The daytime traffic clip was processed with the default COCO YOLO11n +
+ByteTrack configuration and the default normalized center line. The JSON
+summary records one observed `negative_to_positive` crossing.
+
+### Rainy-road traffic
+
+![Rainy-road traffic demo](docs/assets/demos/traffic-rainy-road.gif)
+
+[Download the annotated H.264 MP4](docs/assets/demos/traffic-rainy-road.mp4)
+
+The rainy-road clip uses the same detector and tracker with the reproducible
+`configs/pipeline_demo_rainy.yaml` analytics override. Its line is placed
+across the observed vehicle path. The JSON summary records one observed
+`positive_to_negative` crossing; the line geometry is analytics-only and does
+not change detector or tracker thresholds.
 
 Trajectory trails use a configurable time window, defaulting to 3 seconds in
 `configs/analytics.yaml`. The complete smoothed trajectory history remains in
@@ -157,12 +163,8 @@ detector config selects `device: auto`.
 
 The canonical Compose file is the reproducible deployment path: it mounts
 models, data and outputs, and runs the CPU API behind the local port above.
-On 2026-10-25 the workflow was also exercised in an isolated validation
-stack on port `18000` with `/health`, upload, completion, JSON/MP4 downloads,
-codec/dimension checks and visual line placement checks. The application was
-verified from a dependency-identical image while a fresh ARM64 dependency
-build was attempted; that full rebuild stalled on the 454 MB Torch download.
-The Dockerfile now enables a BuildKit pip cache mount for future rebuilds.
+The Dockerfile uses a BuildKit pip cache mount to reduce repeated dependency
+download time on ARM64 hosts.
 
 ## Measured results
 
@@ -200,9 +202,9 @@ the balanced baseline was therefore retained for the final evaluation.
 
 ### Runtime
 
-On local `sample2.mp4`, 505 frames were processed in 19.424 seconds with an
-effective 25.999 FPS. Detector + tracker consumed 13.644 seconds; drawing
-consumed 3.497 seconds; H.264 transcode consumed 0.789 seconds.
+In a recorded 505-frame traffic run, 19.424 seconds elapsed at an effective
+25.999 FPS. Detector + tracker consumed 13.644 seconds; drawing consumed
+3.497 seconds; H.264 transcode consumed 0.789 seconds.
 
 ![Latency breakdown](docs/assets/latency_breakdown.png)
 
@@ -238,9 +240,8 @@ ruff format --check src/tracklab evaluation scripts tests
 GitHub Actions runs the same lint, format and test checks for pushes and pull
 requests targeting `master`.
 
-The final local quality gate for this change passed with `214 passed` and one
-existing FastAPI/Starlette `httpx` deprecation warning; Ruff, formatting,
-Compose config and `git diff --check` were also clean.
+The repository quality gates cover the full pytest suite, Ruff lint and
+formatting, Compose configuration and `git diff --check`.
 
 ## Repository guide
 
@@ -263,16 +264,14 @@ Compose config and `git diff --check` were also clean.
   degradation on MOT17. It is not the default model.
 - The E5 manual count is a bounded one-sequence audit, not a general human-count
   accuracy benchmark.
-- Docker E2E was verified locally in an isolated stack on Docker Desktop. A
-  fresh full dependency rebuild can be slow on ARM64 because of the large
-  Torch wheel; the dependency-identical application validation is documented
-  in [`reports/analytics_resolution_audit.md`](reports/analytics_resolution_audit.md).
+- A fresh full Docker dependency rebuild can be slow on ARM64 because of the
+  large Torch wheel.
 - The FastAPI service is a local demo: authentication, quotas, durable worker
   queues and production observability are not implemented.
 
 ## License and attribution
 
 TrackLab source code is released under [AGPL-3.0-only](LICENSE). Ultralytics
-YOLO, MOT17, BDD100K, TrackEval and the local sample videos have separate terms;
-see [`DATA_LICENSES.md`](DATA_LICENSES.md) before redistribution or commercial
-use. Model and dataset files are excluded from Git.
+YOLO, MOT17, BDD100K, TrackEval and the published demo media have separate
+terms; see [`DATA_LICENSES.md`](DATA_LICENSES.md) before redistribution or
+commercial use. Model and dataset files are excluded from Git.

@@ -1,0 +1,16 @@
+point: foot
+
+lines:
+  - id: line_1
+    coordinate_space: normalized
+    # Place the line across the observed vehicle path in the rainy-road clip.
+    p1: [0.052083333333333336, 0.75]
+    p2: [0.9375, 0.75]
+
+min_track_age: 5
+cooldown_frames: 15
+
+trajectories:
+  min_len: 10
+  smooth_window: 5
+  trail_duration_seconds: 3.0

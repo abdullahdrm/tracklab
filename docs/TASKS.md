@@ -159,8 +159,12 @@ Kurallar:
 - [x] Hata analizi (`reports/error_analysis.md`)
 
 ### Gün 18: Test ve CI
-- [ ] Eksik testler tamamlandı
-- [ ] CI yeşil
+- [x] Eksik testler tamamlandı
+- [x] CI yeşil
+
+  207 yerel test geçti; GitHub Actions run `40193226323` lint, format ve
+  pytest adımlarında başarılı. Docker daemon bu ortamda çalışmadığı için image
+  build/health smoke test'i ayrıca raporlandı.
 
 ### Gün 19: Dokümantasyon
 - [ ] README (mimari diyagram, demo GIF, sonuç tablosu, kurulum)

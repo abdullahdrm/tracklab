@@ -314,3 +314,13 @@ sonraki adım Gün 9 kalite metrikleri ve klasik ön işleme modülleridir.
 - Hata analizi `reports/error_analysis.md` altında; fine-tuning'in tuning
   ve hold-out'ta gerilemesi domain shift/calibration/track continuity
   hipotezleriyle, kanıt sınırları korunarak belgelendi.
+
+## 2026-10-25: Gün 18 — Test, CI ve Docker doğrulaması
+
+- Tüm yerel test paketi 207 test ile başarılı; Ruff lint, biçim ve diff kontrolü
+  temiz.
+- GitHub Actions master run `40193226323` başarılı: FFmpeg kurulumu, bağımlılık,
+  lint, format ve pytest adımları yeşil.
+- `docker compose config` başarılı. Docker CLI kurulu ancak yerel daemon socket'i
+  olmadığı için yeni image build'i ve `/health` smoke test'i çalıştırılamadı;
+  bu durum `reports/day18_validation.md` içinde açıkça sınır olarak yazıldı.

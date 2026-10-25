@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 from numpy.typing import NDArray
 
+from tracklab.config import LineConfig
 from tracklab.schemas import TrackedObject
 
 Frame = NDArray[np.uint8]
@@ -146,6 +147,56 @@ def draw_tracks(
             (255, 255, 255),
             text_thickness,
             lineType=cv2.LINE_AA,
+        )
+
+    return annotated
+
+
+def draw_analytics(
+    frame: Frame,
+    *,
+    lines: Sequence[LineConfig] = (),
+    line_counts: Mapping[str, Mapping[str, int]] | None = None,
+    trajectories: Mapping[int, Sequence[tuple[float, float]]] | None = None,
+) -> Frame:
+    """Draw configured counting lines, counts, and trajectory trails."""
+
+    annotated = frame.copy()
+    line_counts = line_counts or {}
+    trajectories = trajectories or {}
+
+    for track_id, points in trajectories.items():
+        if len(points) < 2:
+            continue
+        polyline = np.asarray(points, dtype=np.int32).reshape(-1, 1, 2)
+        cv2.polylines(
+            annotated,
+            [polyline],
+            isClosed=False,
+            color=_track_color(int(track_id)),
+            thickness=2,
+            lineType=cv2.LINE_AA,
+        )
+
+    for index, line in enumerate(lines):
+        p1 = tuple(round(value) for value in line.p1)
+        p2 = tuple(round(value) for value in line.p2)
+        cv2.line(annotated, p1, p2, (0, 220, 255), 3, cv2.LINE_AA)
+        counts = line_counts.get(line.id, {})
+        label = (
+            f"{line.id}: +→− {counts.get('positive_to_negative', 0)}  "
+            f"−→+ {counts.get('negative_to_positive', 0)}"
+        )
+        origin = (20, 35 + index * 30)
+        cv2.putText(
+            annotated,
+            label,
+            origin,
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.75,
+            (0, 220, 255),
+            2,
+            cv2.LINE_AA,
         )
 
     return annotated

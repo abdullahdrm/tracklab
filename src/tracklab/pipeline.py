@@ -8,6 +8,8 @@ from typing import Protocol
 import numpy as np
 from numpy.typing import NDArray
 
+from tracklab.analytics.line_counter import LineCounter
+from tracklab.analytics.trajectories import TrajectoryStore
 from tracklab.config import PipelineConfig
 from tracklab.io.results import save_json, save_mot_txt
 from tracklab.io.video import (
@@ -21,7 +23,7 @@ from tracklab.quality.metrics import compute_frame_quality
 from tracklab.quality.report import QUALITY_METRICS, summarize_quality_samples
 from tracklab.schemas import FrameResult, TrackedObject, VideoResult
 from tracklab.tracking.yolo_bytetrack import YoloByteTrack
-from tracklab.viz.draw import ClassNames, draw_tracks
+from tracklab.viz.draw import ClassNames, draw_analytics, draw_tracks
 
 Frame = NDArray[np.uint8]
 
@@ -107,6 +109,8 @@ class VideoPipeline:
         )
 
         frames: list[FrameResult] = []
+        line_counter = LineCounter(self.config.analytics)
+        trajectory_store = TrajectoryStore(self.config.analytics.trajectories)
         unique_track_ids: set[int] = set()
         objects_by_class_id: dict[str, int] = {}
         total_detections = 0
@@ -132,6 +136,8 @@ class VideoPipeline:
                     # only the detector/tracker receives the transformed frame.
                     tracking_frame = preprocessor(frame)
                     objects = tracker.track_frame(tracking_frame)
+                    line_counter.update(frame_index, objects)
+                    trajectory_store.update(objects)
 
                     if raw_video_path is not None and writer is None:
                         writer = stack.enter_context(
@@ -164,6 +170,12 @@ class VideoPipeline:
                             objects,
                             class_names=class_names,
                         )
+                        annotated = draw_analytics(
+                            annotated,
+                            lines=self.config.analytics.lines,
+                            line_counts=line_counter.counts,
+                            trajectories=trajectory_store.visible_trajectories(),
+                        )
                         writer.write(annotated)
 
             if not frames:
@@ -181,6 +193,10 @@ class VideoPipeline:
             "unique_tracks": len(unique_track_ids),
             "track_ids": sorted(unique_track_ids),
             "objects_by_class_id": objects_by_class_id,
+            "analytics": {
+                "line_counts": line_counter.summary(),
+                "trajectories": trajectory_store.summary(),
+            },
         }
 
         quality_metric_samples = [
